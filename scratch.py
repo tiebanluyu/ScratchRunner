@@ -1,16 +1,19 @@
 import json ,pygame
 t=json.loads(open("project.json","r",encoding="utf-8").read())
 
-class Sprite:
+class Sprite():
     def __init__(self,dict1) -> None:
 
         self.__dict__.update(dict1)
         #print(self.name)
-
+    def draw(self):
+        image = pygame.image.load(self.costumes[0]["md5ext"])
+        screen.blit(image, (self.x, self.y))
 
     
 list1=[]
 for i in t["targets"]:
+    
     o=Sprite(i)
     list1.append(o)
     print(o,o.name)
@@ -36,7 +39,7 @@ rect_height = 50
 
 # 设置颜色
 red = (255, 0, 0)
-
+image = pygame.image.load("costume1.svg")
 # 游戏循环
 done = False
 while not done:
@@ -47,8 +50,11 @@ while not done:
 
     # 填充窗口颜色
     screen.fill((255, 255, 255))
+    for i in list1:
+        if not i.isStage:
+            i.draw()
 
-    pygame.blit("costume1.svg")
+    
 
     # 更新窗口
     pygame.display.update()
