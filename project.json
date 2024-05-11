@@ -1,0 +1,140 @@
+{
+  "targets": [
+    {
+      "isStage": true,
+      "name": "Stage",
+      "variables": { "`jEk@4|i[#Fk?(8x)AV.-my variable": ["我的变量", 0] },
+      "lists": {},
+      "broadcasts": {},
+      "blocks": {},
+      "comments": {},
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "name": "背景1",
+          "dataFormat": "svg",
+          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
+          "rotationCenterX": 240,
+          "rotationCenterY": 180
+        }
+      ],
+      "sounds": [],
+      "volume": 100,
+      "layerOrder": 0,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "on",
+      "textToSpeechLanguage": null
+    },
+    {
+      "isStage": false,
+      "name": "角色1",
+      "variables": {},
+      "lists": {},
+      "broadcasts": {},
+      "blocks": {
+        "e": {
+          "opcode": "event_whenflagclicked",
+          "next": "b",
+          "parent": null,
+          "inputs": {},
+          "fields": {},
+          "shadow": false,
+          "topLevel": true,
+          "x": 133,
+          "y": 109
+        },
+        "a": {
+          "opcode": "control_if",
+          "next": "c",
+          "parent": "b",
+          "inputs": { "CONDITION": [2, "d"], "SUBSTACK": [2, "f"] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "d": {
+          "opcode": "sensing_touchingobject",
+          "next": null,
+          "parent": "a",
+          "inputs": { "TOUCHINGOBJECTMENU": [1, "g"] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "g": {
+          "opcode": "sensing_touchingobjectmenu",
+          "next": null,
+          "parent": "d",
+          "inputs": {},
+          "fields": { "TOUCHINGOBJECTMENU": ["_mouse_", null] },
+          "shadow": true,
+          "topLevel": false
+        },
+        "f": {
+          "opcode": "motion_movesteps",
+          "next": null,
+          "parent": "a",
+          "inputs": { "STEPS": [1, [4, "10"]] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b": {
+          "opcode": "motion_turnright",
+          "next": "a",
+          "parent": "e",
+          "inputs": { "DEGREES": [1, [4, "15"]] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "c": {
+          "opcode": "motion_goto",
+          "next": null,
+          "parent": "a",
+          "inputs": { "TO": [1, "h"] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "h": {
+          "opcode": "motion_goto_menu",
+          "next": null,
+          "parent": "c",
+          "inputs": {},
+          "fields": { "TO": ["_random_", null] },
+          "shadow": true,
+          "topLevel": false
+        }
+      },
+      "comments": {},
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "name": "造型1",
+          "bitmapResolution": 1,
+          "dataFormat": "svg",
+          "assetId": "291eb0dfd0ac81b09f5328620068a5ab",
+          "md5ext": "291eb0dfd0ac81b09f5328620068a5ab.svg",
+          "rotationCenterX": 30.5,
+          "rotationCenterY": 59
+        }
+      ],
+      "sounds": [],
+      "volume": 100,
+      "layerOrder": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "size": 100,
+      "direction": -75,
+      "draggable": false,
+      "rotationStyle": "all around"
+    }
+  ],
+  "monitors": [],
+  "extensions": [],
+  "meta": { "semver": "3.0.0", "vm": "0.2.0", "agent": "" }
+}
