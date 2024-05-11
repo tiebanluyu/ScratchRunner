@@ -1,4 +1,7 @@
 import json ,pygame
+def positionmap(x,y):
+    return 240-x,180-y
+
 t=json.loads(open("project.json","r",encoding="utf-8").read())
 
 class Sprite():
@@ -31,17 +34,10 @@ screen = pygame.display.set_mode(size)
 # 设置窗口标题
 pygame.display.set_caption("My Game")
 
-# 设置矩形位置和大小
-rect_x = 50
-rect_y = 50
-rect_width = 50
-rect_height = 50
 
-# 设置颜色
-red = (255, 0, 0)
-image = pygame.image.load("costume1.svg")
-# 游戏循环
+
 done = False
+
 while not done:
     # 处理事件
     for event in pygame.event.get():

@@ -45,6 +45,15 @@
           "x": 133,
           "y": 109
         },
+        "b": {
+          "opcode": "motion_turnright",
+          "next": "a",
+          "parent": "e",
+          "inputs": { "DEGREES": [1, [4, "15"]] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
         "a": {
           "opcode": "control_if",
           "next": "c",
@@ -81,15 +90,6 @@
           "shadow": false,
           "topLevel": false
         },
-        "b": {
-          "opcode": "motion_turnright",
-          "next": "a",
-          "parent": "e",
-          "inputs": { "DEGREES": [1, [4, "15"]] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
         "c": {
           "opcode": "motion_goto",
           "next": null,
@@ -110,7 +110,7 @@
         }
       },
       "comments": {},
-      "currentCostume": 0,
+      "currentCostume": 1,
       "costumes": [
         {
           "name": "造型1",
@@ -120,14 +120,23 @@
           "md5ext": "291eb0dfd0ac81b09f5328620068a5ab.svg",
           "rotationCenterX": 30.5,
           "rotationCenterY": 59
+        },
+        {
+          "name": "costume1",
+          "bitmapResolution": 1,
+          "dataFormat": "svg",
+          "assetId": "8861b6a9bfac809c1cbb687c8eeb074a",
+          "md5ext": "8861b6a9bfac809c1cbb687c8eeb074a.svg",
+          "rotationCenterX": 80.64475528019247,
+          "rotationCenterY": 117.01189501393259
         }
       ],
       "sounds": [],
       "volume": 100,
       "layerOrder": 1,
       "visible": true,
-      "x": 0,
-      "y": 0,
+      "x": 81,
+      "y": 60,
       "size": 100,
       "direction": -75,
       "draggable": false,
