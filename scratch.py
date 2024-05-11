@@ -27,7 +27,12 @@ class Sprite():
 def runcode(sprite,flag):
     code=sprite.block[flag]
     if code["opcode"]=="motion_turnright":
-        self.angle+=###########################################
+        addition=code["inputs"]["DEGREES"]
+        if isinstance(addition[1],str):
+            sprite.angle+=runcode(addition[1])
+
+        else:
+            sprite.angle+=addition
 def run(sprite):
     for flag,code in sprite.block.items():
         if code["opcode"]=="event_whenflagclicked":
