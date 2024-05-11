@@ -7,7 +7,7 @@ origin_x = size[0] // 2
 origin_y = size[1] // 2
  
 # 自定义坐标转换函数
-def positionmap(x:int, y):
+def positionmap(x:int, y:int)->tuple:
     new_x = x + origin_x
     new_y = -y + origin_y
     return new_x, new_y
@@ -16,15 +16,15 @@ def positionmap(x:int, y):
 t=json.loads(open("project.json","r",encoding="utf-8").read())
 
 class Sprite():
-    def __init__(self,dict1) -> None:
+    def __init__(self,dict1:dict) -> None:
 
         self.__dict__.update(dict1)
         #print(self.name)
-    def draw(self):
+    def draw(self)->None:
         image = pygame.image.load(self.costumes[self.currentCostume]["md5ext"])
         screen.blit(image, positionmap(self.x, self.y))
     codes={"forward":lambda self,x:exec("self.x+=x")}    
-def runcode(sprite,flag):
+def runcode(sprite:Sprite,flag:str)->any:
     code=sprite.block[flag]
     if code["opcode"]=="motion_turnright":
         addition=code["inputs"]["DEGREES"]
