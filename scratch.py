@@ -55,10 +55,14 @@ class Sprite():
             runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])           
 
 def runcode(sprite:Sprite,flag:str)->any:
+    global done
+    if done:
+        exit()
+
     #code=sprite.blocks[flag]
     #print(sprite.blocks[flag]["opcode"],flag)
     sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
-    time.sleep(0.02)    
+    clock.tick(20)    
 def run(sprite):
     flag:str
     code:dict
@@ -74,6 +78,8 @@ def run(sprite):
     
 list1=[]
 threads=[]
+done = False
+clock = pygame.time.Clock()
 for i in t["targets"]:
     
     o=Sprite(i)
@@ -87,6 +93,7 @@ for i in t["targets"]:
 # 初始化Pygame
 pygame.init()
 
+
 # 设置窗口大小
 size = (480, 360)
 position = (0,0)
@@ -98,7 +105,7 @@ pygame.display.set_caption("My Game")
 
 
 
-done = False
+
 list1[1].x=0;list1[1].y=0;list1[1].direction=0
 while not done:
     # 处理事件
@@ -122,6 +129,6 @@ while not done:
 
     # 更新窗口
     pygame.display.update()
-    time.sleep(0.1)
+    clock.tick(20)
 
 # 退出Pygame 
