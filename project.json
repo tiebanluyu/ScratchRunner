@@ -34,9 +34,9 @@
       "lists": {},
       "broadcasts": {},
       "blocks": {
-        "e": {
+        "b": {
           "opcode": "event_whenflagclicked",
-          "next": "b",
+          "next": "a",
           "parent": null,
           "inputs": {},
           "fields": {},
@@ -45,100 +45,46 @@
           "x": 133,
           "y": 109
         },
-        "b": {
-          "opcode": "motion_turnright",
-          "next": "a",
-          "parent": "e",
-          "inputs": { "DEGREES": [1, [4, "15"]] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
         "a": {
-          "opcode": "control_if",
-          "next": "c",
+          "opcode": "control_forever",
+          "next": null,
           "parent": "b",
-          "inputs": { "CONDITION": [2, "d"], "SUBSTACK": [2, "f"] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
-        "d": {
-          "opcode": "sensing_touchingobject",
-          "next": null,
-          "parent": "a",
-          "inputs": { "TOUCHINGOBJECTMENU": [1, "g"] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
-        "g": {
-          "opcode": "sensing_touchingobjectmenu",
-          "next": null,
-          "parent": "d",
-          "inputs": {},
-          "fields": { "TOUCHINGOBJECTMENU": ["_mouse_", null] },
-          "shadow": true,
-          "topLevel": false
-        },
-        "f": {
-          "opcode": "motion_movesteps",
-          "next": null,
-          "parent": "a",
-          "inputs": { "STEPS": [1, [4, "10"]] },
+          "inputs": { "SUBSTACK": [2, "c"] },
           "fields": {},
           "shadow": false,
           "topLevel": false
         },
         "c": {
-          "opcode": "motion_goto",
+          "opcode": "motion_turnright",
           "next": null,
           "parent": "a",
-          "inputs": { "TO": [1, "h"] },
+          "inputs": { "DEGREES": [1, [4, "15"]] },
           "fields": {},
           "shadow": false,
-          "topLevel": false
-        },
-        "h": {
-          "opcode": "motion_goto_menu",
-          "next": null,
-          "parent": "c",
-          "inputs": {},
-          "fields": { "TO": ["_random_", null] },
-          "shadow": true,
           "topLevel": false
         }
       },
       "comments": {},
-      "currentCostume": 1,
+      "currentCostume": 0,
       "costumes": [
         {
           "name": "造型1",
           "bitmapResolution": 1,
           "dataFormat": "svg",
-          "assetId": "291eb0dfd0ac81b09f5328620068a5ab",
-          "md5ext": "291eb0dfd0ac81b09f5328620068a5ab.svg",
-          "rotationCenterX": 30.5,
-          "rotationCenterY": 59
-        },
-        {
-          "name": "costume1",
-          "bitmapResolution": 1,
-          "dataFormat": "svg",
-          "assetId": "8861b6a9bfac809c1cbb687c8eeb074a",
-          "md5ext": "8861b6a9bfac809c1cbb687c8eeb074a.svg",
-          "rotationCenterX": 80.64475528019247,
-          "rotationCenterY": 117.01189501393259
+          "assetId": "9420afde92711e55727291a3db7fa0c6",
+          "md5ext": "9420afde92711e55727291a3db7fa0c6.svg",
+          "rotationCenterX": 83.1611636366163,
+          "rotationCenterY": 59.987498538834714
         }
       ],
       "sounds": [],
       "volume": 100,
       "layerOrder": 1,
       "visible": true,
-      "x": 81,
-      "y": 60,
+      "x": -20,
+      "y": 4,
       "size": 100,
-      "direction": -75,
+      "direction": -105,
       "draggable": false,
       "rotationStyle": "all around"
     }

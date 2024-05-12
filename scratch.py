@@ -1,6 +1,7 @@
 import json 
 import pygame # type: ignore
 import time
+import threading
 #from pygame.locals import * # type: ignore
 
 from math import sin,cos
@@ -19,14 +20,15 @@ def positionmap(x:int, y:int)->tuple:
 
 
 t=json.loads(open("project.json","r",encoding="utf-8").read())
-def S_eval(sprite,flag)->dict:
+def S_eval(sprite,flag:str)->dict:
     result={}
-    input1=sprite.block[flag]["inputs"]
+    input1=sprite.blocks[flag]["inputs"]
     for i,j in input1.items():
-        if isinstance(j[2],list):
-            result[i]=runcode(sprite,j[1][1])
+        if isinstance(j[1],list):
+            result[i]=j[1][1]################
         else:
-            result[i]=j[1]
+            result[i]=runcode(j[1])
+    return result        
 class Sprite():
     def __init__(self,dict1:dict) -> None:
 
@@ -40,30 +42,46 @@ class Sprite():
         angle=self.direction  
         self.x+=sin(angle)*distance
         self.y+=cos(angle)*distance
-        
-def runcode(sprite:Sprite,flag:str)->any:
-    code=sprite.block[flag]
-    if code["opcode"]=="motion_turnright":
-        addition=code["inputs"]["DEGREES"]
-        if isinstance(addition[1],str):
-            sprite.direction+=runcode(addition[1])
+    def motion_turnright(self,flag):
+        addition=S_eval(self,flag)["DEGREES"]
+        self.direction+=int(addition)
+    def event_whenflagclicked(self,flag):
+        runcode(self,self.blocks[flag]["next"]  ) 
+    def control_if(self,flag):
+        if S_eval(self,flag):
+            runcode(self,flag)  
+    def control_forever(self,flag):
+        while 1:
+            runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])           
 
-        else:
-            sprite.direction+=addition
+def runcode(sprite:Sprite,flag:str)->any:
+    #code=sprite.blocks[flag]
+    #print(sprite.blocks[flag]["opcode"],flag)
+    sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+    time.sleep(0.02)    
 def run(sprite):
-    for flag,code in sprite.block.items():#code是字母后面的括号
+    flag:str
+    code:dict
+    
+    for flag,code in sprite.blocks.items():#code是字母后面的括号
         if code["opcode"]=="event_whenflagclicked":
-            flag=code[next]
+            print(flag)
+            flag=code["next"]
             runcode(sprite,flag)
+
 
             
     
 list1=[]
+threads=[]
 for i in t["targets"]:
     
     o=Sprite(i)
     list1.append(o)
     print(o,o.name)
+    td = threading.Thread(target=run, name=o.name,args=(o,))
+    threads.append(td)
+    td.start()
 
 
 # 初始化Pygame
@@ -85,6 +103,9 @@ list1[1].x=0;list1[1].y=0;list1[1].direction=0
 while not done:
     # 处理事件
     #list1[1].forward(1)
+    #breakpoint()
+    #list1[1].motion_turnright("c")
+    #list1[1].direction+=1
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -96,6 +117,7 @@ while not done:
         if not i.isStage:
             i.draw()
 
+    
     
 
     # 更新窗口
