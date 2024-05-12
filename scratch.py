@@ -1,26 +1,33 @@
-import json 
-import pygame # type: ignore
-import time
-import threading
-#from pygame.locals import * # type: ignore
-
+import json #需要读取project.json
+import pygame #vscode检测不到pygame type: ignore
+import threading#多线程并行需要
 from math import sin,cos
+
 # 设置窗口大小
-size = (480, 360)
-position = (0,0)
+STAGE_SIZE = (480, 360)
+POSITION = (0,0)
 
  
 # 自定义坐标转换函数
-origin_x = size[0] // 2
-origin_y = size[1] // 2
+ORIGIN_X = STAGE_SIZE[0] // 2
+ORIGIN_Y = STAGE_SIZE[1] // 2
+#本应将这两个放入positionmap函数，但每次都要除一次太费事了
 def positionmap(x:int, y:int)->tuple:
-    new_x = x + origin_x
-    new_y = -y + origin_y
+    """
+    自定义坐标转换函数
+    pygame的坐标系不一样，要将其转换成sctatch的坐标系
+    
+    
+    """
+    new_x = x + ORIGIN_X
+    new_y = -y + ORIGIN_Y
     return new_x, new_y
 
 
-t=json.loads(open("project.json","r",encoding="utf-8").read())
+
+
 def S_eval(sprite,flag:str)->dict:
+
     result={}
     input1=sprite.blocks[flag]["inputs"]
     for i,j in input1.items():
@@ -38,10 +45,6 @@ class Sprite():
         image = pygame.image.load(self.costumes[self.currentCostume]["md5ext"])
         image = pygame.transform.rotate(image, self.direction+90)
         screen.blit(image, positionmap(self.x, self.y))
-    def forward(self,distance):
-        angle=self.direction  
-        self.x+=sin(angle)*distance
-        self.y+=cos(angle)*distance
     def motion_turnright(self,flag):
         addition=S_eval(self,flag)["DEGREES"]
         self.direction+=int(addition)
@@ -74,16 +77,16 @@ def run(sprite):
             runcode(sprite,flag)
 
 
-            
-    
-list1=[]
+#主程序从这里开始            
+t=json.loads(open("project.json","r",encoding="utf-8").read())    
+sprite_list=[]
 threads=[]
 done = False
 clock = pygame.time.Clock()
 for i in t["targets"]:
     
     o=Sprite(i)
-    list1.append(o)
+    sprite_list.append(o)
     print(o,o.name)
     td = threading.Thread(target=run, name=o.name,args=(o,))
     threads.append(td)
@@ -92,13 +95,7 @@ for i in t["targets"]:
 
 # 初始化Pygame
 pygame.init()
-
-
-# 设置窗口大小
-size = (480, 360)
-position = (0,0)
-
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(STAGE_SIZE)
 
 # 设置窗口标题
 pygame.display.set_caption("My Game")
@@ -106,7 +103,7 @@ pygame.display.set_caption("My Game")
 
 
 
-list1[1].x=0;list1[1].y=0;list1[1].direction=0
+sprite_list[1].x=0;sprite_list[1].y=0;sprite_list[1].direction=0
 while not done:
     # 处理事件
     #list1[1].forward(1)
@@ -120,7 +117,7 @@ while not done:
     # 填充窗口颜色
     screen.fill((255, 255, 255))
 
-    for i in list1:
+    for i in sprite_list:
         if not i.isStage:
             i.draw()
 
