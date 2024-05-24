@@ -11,12 +11,13 @@
       "currentCostume": 0,
       "costumes": [
         {
-          "name": "背景1",
-          "dataFormat": "svg",
-          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
-          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
-          "rotationCenterX": 240,
-          "rotationCenterY": 180
+          "name": "Xy-grid",
+          "bitmapResolution": 2,
+          "dataFormat": "png",
+          "assetId": "d1d9137b25bc34eda87ff46cb545638c",
+          "md5ext": "d1d9137b25bc34eda87ff46cb545638c.png",
+          "rotationCenterX": 480,
+          "rotationCenterY": 360
         }
       ],
       "sounds": [],
@@ -34,7 +35,7 @@
       "lists": {},
       "broadcasts": {},
       "blocks": {
-        "e": {
+        "b": {
           "opcode": "event_whenflagclicked",
           "next": "a",
           "parent": null,
@@ -42,86 +43,26 @@
           "fields": {},
           "shadow": false,
           "topLevel": true,
-          "x": 133,
-          "y": 109
+          "x": 622,
+          "y": 412
         },
         "a": {
-          "opcode": "motion_gotoxy",
-          "next": "b",
-          "parent": "e",
-          "inputs": { "X": [1, [4, "100"]], "Y": [1, [4, "100"]] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
-        "b": {
           "opcode": "control_forever",
           "next": null,
-          "parent": "a",
-          "inputs": { "SUBSTACK": [2, "f"] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
-        "f": {
-          "opcode": "motion_movesteps",
-          "next": null,
           "parent": "b",
-          "inputs": { "STEPS": [1, [4, "10"]] },
+          "inputs": { "SUBSTACK": [2, "c"] },
           "fields": {},
           "shadow": false,
           "topLevel": false
         },
         "c": {
           "opcode": "motion_turnright",
-          "next": "g",
-          "parent": "d",
+          "next": null,
+          "parent": "a",
           "inputs": { "DEGREES": [1, [4, "15"]] },
           "fields": {},
           "shadow": false,
           "topLevel": false
-        },
-        "g": {
-          "opcode": "motion_glidesecstoxy",
-          "next": null,
-          "parent": "c",
-          "inputs": {
-            "SECS": [1, [4, "1"]],
-            "X": [1, [4, "-140"]],
-            "Y": [1, [4, "-171"]]
-          },
-          "fields": {},
-          "shadow": false,
-          "topLevel": false
-        },
-        "d": {
-          "opcode": "procedures_definition",
-          "next": "c",
-          "parent": null,
-          "inputs": { "custom_block": [1, "h"] },
-          "fields": {},
-          "shadow": false,
-          "topLevel": true,
-          "x": 136,
-          "y": 459
-        },
-        "h": {
-          "opcode": "procedures_prototype",
-          "next": null,
-          "parent": "d",
-          "inputs": {},
-          "fields": {},
-          "shadow": true,
-          "topLevel": false,
-          "mutation": {
-            "tagName": "mutation",
-            "children": [],
-            "proccode": "1",
-            "argumentids": "[]",
-            "argumentnames": "[]",
-            "argumentdefaults": "[]",
-            "warp": "false"
-          }
         }
       },
       "comments": {},
@@ -131,20 +72,20 @@
           "name": "造型1",
           "bitmapResolution": 1,
           "dataFormat": "svg",
-          "assetId": "1eccc5ff6c84de501f9b14f7258553dd",
-          "md5ext": "1eccc5ff6c84de501f9b14f7258553dd.svg",
-          "rotationCenterX": 7.196366080017356,
-          "rotationCenterY": 114.53534139217237
+          "assetId": "504b38b988937fd2e0416438f0b77dc9",
+          "md5ext": "504b38b988937fd2e0416438f0b77dc9.svg",
+          "rotationCenterX": 21.874638860650577,
+          "rotationCenterY": 17.693599869953488
         }
       ],
       "sounds": [],
       "volume": 100,
       "layerOrder": 1,
       "visible": true,
-      "x": -160.00000000000009,
-      "y": -171,
+      "x": 0,
+      "y": 0,
       "size": 100,
-      "direction": -150,
+      "direction": 179.38775338102838,
       "draggable": false,
       "rotationStyle": "all around"
     }

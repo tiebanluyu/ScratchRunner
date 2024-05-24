@@ -45,10 +45,16 @@ class Sprite():
         #print(self.name)
     def draw(self)->None:
         image = pygame.image.load(self.costumes[self.currentCostume]["md5ext"])
+        if self.isStage:
+            image=pygame.transform.rotozoom(image, 0, 0.5)#测试表明，需要加入这一行
+            screen.blit(image,(0,0))
+            return
         image = pygame.transform.rotate(image, self.direction+90)
-        screen.blit(image, positionmap(self.x, self.y))
-        #self.x=1
-        #print(self.x,self.y)
+        move_x=0;image.get_size()[1]*abs(sin(radians(self.direction)))
+        screen.blit(image, positionmap(self.x-self.costumes[self.currentCostume]["rotationCenterX"]-move_x, 
+                                       self.y+self.costumes[self.currentCostume]["rotationCenterY"]))
+        #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
+
     def motion_movesteps(self,flag:str) -> None :
         steps:int=int(S_eval(self,flag)["STEPS"]) 
         #logging.info(self.direction)
@@ -82,7 +88,10 @@ def runcode(sprite:Sprite,flag:str)->any:
         
         exit()
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
-    sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+    try:
+        sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+    except:
+        logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
     clock.tick(20)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
@@ -144,9 +153,9 @@ while not done:
     screen.fill((255, 255, 255))
 
     for i in sprite_list:
-        if not i.isStage:
+        
             #i.x=100
-            i.draw()
+        i.draw()
 
     
     
