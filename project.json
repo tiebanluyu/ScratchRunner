@@ -34,7 +34,7 @@
       "lists": {},
       "broadcasts": {},
       "blocks": {
-        "b": {
+        "e": {
           "opcode": "event_whenflagclicked",
           "next": "a",
           "parent": null,
@@ -46,22 +46,82 @@
           "y": 109
         },
         "a": {
+          "opcode": "motion_gotoxy",
+          "next": "b",
+          "parent": "e",
+          "inputs": { "X": [1, [4, "100"]], "Y": [1, [4, "100"]] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b": {
           "opcode": "control_forever",
           "next": null,
+          "parent": "a",
+          "inputs": { "SUBSTACK": [2, "f"] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "f": {
+          "opcode": "motion_movesteps",
+          "next": null,
           "parent": "b",
-          "inputs": { "SUBSTACK": [2, "c"] },
+          "inputs": { "STEPS": [1, [4, "10"]] },
           "fields": {},
           "shadow": false,
           "topLevel": false
         },
         "c": {
           "opcode": "motion_turnright",
-          "next": null,
-          "parent": "a",
+          "next": "g",
+          "parent": "d",
           "inputs": { "DEGREES": [1, [4, "15"]] },
           "fields": {},
           "shadow": false,
           "topLevel": false
+        },
+        "g": {
+          "opcode": "motion_glidesecstoxy",
+          "next": null,
+          "parent": "c",
+          "inputs": {
+            "SECS": [1, [4, "1"]],
+            "X": [1, [4, "-140"]],
+            "Y": [1, [4, "-171"]]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "d": {
+          "opcode": "procedures_definition",
+          "next": "c",
+          "parent": null,
+          "inputs": { "custom_block": [1, "h"] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": true,
+          "x": 136,
+          "y": 459
+        },
+        "h": {
+          "opcode": "procedures_prototype",
+          "next": null,
+          "parent": "d",
+          "inputs": {},
+          "fields": {},
+          "shadow": true,
+          "topLevel": false,
+          "mutation": {
+            "tagName": "mutation",
+            "children": [],
+            "proccode": "1",
+            "argumentids": "[]",
+            "argumentnames": "[]",
+            "argumentdefaults": "[]",
+            "warp": "false"
+          }
         }
       },
       "comments": {},
@@ -71,20 +131,20 @@
           "name": "造型1",
           "bitmapResolution": 1,
           "dataFormat": "svg",
-          "assetId": "9420afde92711e55727291a3db7fa0c6",
-          "md5ext": "9420afde92711e55727291a3db7fa0c6.svg",
-          "rotationCenterX": 83.1611636366163,
-          "rotationCenterY": 59.987498538834714
+          "assetId": "1eccc5ff6c84de501f9b14f7258553dd",
+          "md5ext": "1eccc5ff6c84de501f9b14f7258553dd.svg",
+          "rotationCenterX": 7.196366080017356,
+          "rotationCenterY": 114.53534139217237
         }
       ],
       "sounds": [],
       "volume": 100,
       "layerOrder": 1,
       "visible": true,
-      "x": -20,
-      "y": 4,
+      "x": -160.00000000000009,
+      "y": -171,
       "size": 100,
-      "direction": -105,
+      "direction": -150,
       "draggable": false,
       "rotationStyle": "all around"
     }
