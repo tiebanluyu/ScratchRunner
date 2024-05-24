@@ -50,7 +50,7 @@ class Sprite():
         #print(self.x,self.y)
     def motion_movesteps(self,flag:str) -> None :
         steps:int=int(S_eval(self,flag)["STEPS"]) 
-        logging.debug(self.direction)
+        #logging.debug(self.direction)
         x=steps*sin(radians(self.direction))
         y=steps*cos(radians(self.direction))
         self.x+=x;self.y+=y
@@ -79,14 +79,11 @@ def runcode(sprite:Sprite,flag:str)->any:
     if done:
         
         exit()
-    #sprite.x=1    
-
-    #code=sprite.blocks[flag]
-    #print(sprite.blocks[flag]["opcode"],flag)
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
     sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
-    clock.tick(20)  
-    runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
+    clock.tick(20)
+    if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
+        runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
 def run(sprite:"Sprite") -> None:
     flag:str
     code:dict
