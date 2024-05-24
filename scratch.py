@@ -38,8 +38,9 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
     return result        
 class Sprite():
     def __init__(self,dict1:dict) -> None:
+        for name,value in dict1.items():#原来仅仅改变__dict__会带来问题
 
-        self.__dict__.update(dict1)
+            setattr(self, name, value)
         #self.x=1
         #print(self.name)
     def draw(self)->None:
@@ -50,7 +51,8 @@ class Sprite():
         #print(self.x,self.y)
     def motion_movesteps(self,flag:str) -> None :
         steps:int=int(S_eval(self,flag)["STEPS"]) 
-        #logging.debug(self.direction)
+        #logging.info(self.direction)
+
         x=steps*sin(radians(self.direction))
         y=steps*cos(radians(self.direction))
         self.x+=x;self.y+=y
@@ -87,7 +89,9 @@ def runcode(sprite:Sprite,flag:str)->any:
 def run(sprite:"Sprite") -> None:
     flag:str
     code:dict
+
     logging.info(sprite.name+"进入run函数")
+    
     
     for flag,code in sprite.blocks.items():#code是字母后面的括号
         if code["opcode"]=="event_whenflagclicked":
@@ -125,7 +129,7 @@ pygame.display.set_caption("My Game")
 
 
 
-sprite_list[1].x=0;sprite_list[1].y=0;sprite_list[1].direction=0
+#sprite_list[1].x=0;sprite_list[1].y=0;sprite_list[1].direction=0#我那天脑残写了这行
 while not done:
     # 处理事件
     #sprite_list[1].motion_gotoxy("a")
