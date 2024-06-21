@@ -59,7 +59,7 @@
           "opcode": "motion_turnright",
           "next": null,
           "parent": "a",
-          "inputs": { "DEGREES": [1, [4, "15"]] },
+          "inputs": { "DEGREES": [1, [4, "1"]] },
           "fields": {},
           "shadow": false,
           "topLevel": false
@@ -85,7 +85,7 @@
       "x": 0,
       "y": 0,
       "size": 100,
-      "direction": 179.38775338102838,
+      "direction": -91.61224661897162,
       "draggable": false,
       "rotationStyle": "all around"
     }
