@@ -1,7 +1,9 @@
 import json #需要读取project.json
 import pygame #vscode检测不到pygame type: ignore
+import pygame.sprite
 import threading#多线程并行需要
 from math import sin,cos,radians
+import math 
 import logging
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
@@ -36,23 +38,29 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
         else:
             result[i]=runcode(j[1])
     return result        
-class Sprite():
+class Sprite(pygame.sprite.Sprite):
     def __init__(self,dict1:dict) -> None:
+        super().__init__()
         for name,value in dict1.items():#原来仅仅改变__dict__会带来问题
 
             setattr(self, name, value)
         #self.x=1
         #print(self.name)
     def draw(self)->None:
-        image = pygame.image.load(self.costumes[self.currentCostume]["md5ext"])
+        costume=self.costumes[self.currentCostume]
+        image = pygame.image.load(costume["md5ext"])
+        if "svg" != costume["dataFormat"]:
+            image=pygame.transform.rotozoom(image, 0, 0.5)#位图精度高，实际储存时图像会大一些
         if self.isStage:
-            image=pygame.transform.rotozoom(image, 0, 0.5)#测试表明，需要加入这一行
+            
             screen.blit(image,(0,0))
             return
+        
+        #logging.info(self.x+costume["rotationCenterX"])
         image = pygame.transform.rotate(image, self.direction+90)
         move_x=0;image.get_size()[1]*abs(sin(radians(self.direction)))
-        screen.blit(image, positionmap(self.x-self.costumes[self.currentCostume]["rotationCenterX"]-move_x, 
-                                       self.y+self.costumes[self.currentCostume]["rotationCenterY"]))
+        screen.blit(image, positionmap(self.x+costume["rotationCenterX"]/sin(radians(self.direction)), 
+                                       self.y+costume["rotationCenterY"]/cos(radians(self.direction))))
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
     def motion_movesteps(self,flag:str) -> None :
