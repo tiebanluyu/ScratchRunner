@@ -1,9 +1,7 @@
 import json #需要读取project.json
-import pygame #vscode检测不到pygame type: ignore
-import pygame.sprite
+import pygame 
 import threading#多线程并行需要
 from math import sin,cos,radians
-import math 
 import logging
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
@@ -29,6 +27,28 @@ def positionmap(x:int, y:int)->tuple:
 
 
 def S_eval(sprite:"Sprite",flag:str)->dict:
+    """
+    这个函数是根据角色和flag,求值.返回一个dict,其中整合了参数
+    如sprite的flag的内容如下
+    "a": {
+          "opcode": "motion_gotoxy",
+          "next": "b",
+          "parent": "e",
+          "inputs": { "X": [1, [4, "0"]], "Y": [1, [4, "0"]] },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        }
+    
+    则返回值为
+    {'X': '0', 'Y': '0'}
+    
+    
+    
+    
+    
+    """
+    
 
     result={}
     input1:dict=sprite.blocks[flag]["inputs"]
@@ -38,6 +58,7 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
         else:
             result[i]=runcode(j[1])
             logging.info(result)
+    logging.debug(result)
     return result        
 class Sprite():
     def __init__(self,dict1:dict) -> None:        
@@ -49,16 +70,17 @@ class Sprite():
         image = pygame.image.load(costume["md5ext"])
         if "svg" != costume["dataFormat"]:
             image=pygame.transform.rotozoom(image, 0, 0.5)#位图精度高，实际储存时图像会大一些
-        if self.isStage:
-            
+        if self.isStage:            
             screen.blit(image,(0,0))
             return
         
         #logging.info(self.x+costume["rotationCenterX"])
         image = pygame.transform.rotate(image, self.direction+90)
         move_x=0;image.get_size()[1]*abs(sin(radians(self.direction)))
-        screen.blit(image, positionmap(self.x+costume["rotationCenterX"]/sin(radians(self.direction)), 
-                                       self.y+costume["rotationCenterY"]/cos(radians(self.direction))))
+        screen.blit(image, positionmap(self.x, 
+                                      self.y)
+        )
+        logging.debug(self.direction)
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
     def motion_movesteps(self,flag:str) -> None :
@@ -151,7 +173,7 @@ while not done:
 
     # 填充窗口颜色
     screen.fill((255, 255, 255))
-    
+
     # 逐个角色更新窗口
     for i in sprite_list:        
         i.draw()
