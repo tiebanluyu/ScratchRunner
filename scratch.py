@@ -76,12 +76,12 @@ class Sprite():
             return
         
         #logging.info(self.x+costume["rotationCenterX"])
-        image = pygame.transform.rotate(image, self.direction+90)
-        move_x=0;image.get_size()[1]*abs(sin(radians(self.direction)))
-        screen.blit(image, positionmap(self.x, 
-                                      self.y)
+        image = pygame.transform.rotate(image, self.direction-90)
+        x,y=positionmap(self.x,self.y)
+        screen.blit(image,(x,y)
+                    
         )
-        #logging.debug(self.direction)
+        logging.debug(self.direction)
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
     def motion_movesteps(self,flag:str) -> None :
@@ -97,10 +97,10 @@ class Sprite():
         self.y=int(dic["Y"])
     def motion_turnright(self,flag:str) -> None:
         addition=S_eval(self,flag)["DEGREES"]
-        self.direction+=int(addition)
+        self.direction-=int(addition)
     def motion_turnleft(self,flag:str) -> None:
         addition=S_eval(self,flag)["DEGREES"]
-        self.direction-=int(addition)    
+        self.direction+=int(addition)    
     def event_whenflagclicked(self,flag) -> None:
         runcode(self,self.blocks[flag]["next"]  ) 
     def control_if(self,flag:str) -> None:
