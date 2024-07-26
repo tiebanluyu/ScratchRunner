@@ -3,11 +3,12 @@ import pygame
 import threading#多线程并行需要
 from math import sin,cos,radians
 import logging
+import time
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
 POSITION = (0,0)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] line%(lineno)s-%(message)s')
 
 
 # 自定义坐标转换函数
@@ -52,15 +53,19 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
         if isinstance(j[1],list):
             result[i]=j[1][1]
         else:
-            result[i]=runcode(j[1])
-            logging.info(result)
-    logging.debug(result)
+            result[i]=runcode(sprite,j[1])
+            logging.debug(result)
+    
     return result        
 class Sprite():
     def __init__(self,dict1:dict) -> None:        
         for name,value in dict1.items():#原来仅仅改变__dict__会带来问题
             setattr(self, name, value)
-
+    def __str__(self):
+        return self.name
+    def __repr__(self):
+        return self.name
+    
     def draw(self)->None:
         costume=self.costumes[self.currentCostume]
         image = pygame.image.load(costume["md5ext"])
@@ -76,7 +81,7 @@ class Sprite():
         screen.blit(image, positionmap(self.x, 
                                       self.y)
         )
-        logging.debug(self.direction)
+        #logging.debug(self.direction)
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
     def motion_movesteps(self,flag:str) -> None :
@@ -93,12 +98,19 @@ class Sprite():
     def motion_turnright(self,flag:str) -> None:
         addition=S_eval(self,flag)["DEGREES"]
         self.direction+=int(addition)
+    def motion_turnleft(self,flag:str) -> None:
+        addition=S_eval(self,flag)["DEGREES"]
+        self.direction-=int(addition)    
     def event_whenflagclicked(self,flag) -> None:
         runcode(self,self.blocks[flag]["next"]  ) 
     def control_if(self,flag:str) -> None:
 
         if S_eval(self,flag):
             runcode(self,flag)  
+    def control_repeat(self,flag)-> None:
+        dic=S_eval(self,flag)
+        for _ in range(int(dic["TIMES"])):
+            runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])       
     def control_forever(self,flag:str) -> None:
         #logging.debug("111")
         
@@ -107,21 +119,33 @@ class Sprite():
             runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])  
     def control_wait(self,flag:str):
         #未完
-        import time
-        sleeptime=dic=S_eval(self,flag)
-        time.sleep(0)                 
+        
+        sleeptime=float(S_eval(self,flag)["DURATION"])
+        time.sleep(sleeptime)   
+    def motion_pointindirection(self,flag)->None:
+        direction=float(S_eval(self,flag)["DIRECTION"])
+        self.direction=direction                  
 
 def runcode(sprite:Sprite,flag:str)->any:
     global done
-    sprite.direction%=360#这里解决角度超出[0,360]范围的问题
     if done:        
         exit()
+    #logging.debug(("1234",sprite,flag))
+    if flag==None :
+        #logging.debug(f"flag==None,{sprite.direction}")
+        #sprite.direction+=1
+        #time.sleep(1)
+        return
+    #logging.debug(("34567",sprite,flag))
+    
+    sprite.direction%=360#这里解决角度超出[0,360]范围的问题
+
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
     try:
         sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
     except AttributeError:
         logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
-    clock.tick(20)
+    clock.tick(5)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
 
@@ -137,6 +161,7 @@ def run(sprite:"Sprite") -> None:
             #print(flag)
             flag=code["next"]
             runcode(sprite,flag)
+    logging.info(f"{sprite}执行完毕")        
 
 
 #主程序从这里开始            
@@ -178,7 +203,7 @@ while not done:
 
     # 更新窗口
     pygame.display.update()
-    clock.tick(20)
+    clock.tick(50)
 
 # 退出Pygame 
 logging.info("退出程序")
