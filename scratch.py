@@ -8,19 +8,19 @@ import logging
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
 POSITION = (0,0)
-flag:str
+
 logging.basicConfig(level=logging.DEBUG)
+
+
 # 自定义坐标转换函数
-ORIGIN_X = STAGE_SIZE[0] // 2
-ORIGIN_Y = STAGE_SIZE[1] // 2
-#本应将这两个放入positionmap函数，但每次都要除一次太费事了
 def positionmap(x:int, y:int)->tuple:
     """
     自定义坐标转换函数
-    pygame的坐标系不一样，要将其转换成sctatch的坐标系
-    
+    pygame的坐标系不一样，要将其转换成sctatch的坐标系    
     
     """
+    ORIGIN_X = STAGE_SIZE[0] // 2
+    ORIGIN_Y = STAGE_SIZE[1] // 2
     new_x = x + ORIGIN_X
     new_y = -y + ORIGIN_Y
     return new_x, new_y
@@ -37,15 +37,13 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
             result[i]=j[1][1]
         else:
             result[i]=runcode(j[1])
+            logging.info(result)
     return result        
-class Sprite(pygame.sprite.Sprite):
-    def __init__(self,dict1:dict) -> None:
-        super().__init__()
+class Sprite():
+    def __init__(self,dict1:dict) -> None:        
         for name,value in dict1.items():#原来仅仅改变__dict__会带来问题
-
             setattr(self, name, value)
-        #self.x=1
-        #print(self.name)
+
     def draw(self)->None:
         costume=self.costumes[self.currentCostume]
         image = pygame.image.load(costume["md5ext"])
@@ -88,7 +86,12 @@ class Sprite(pygame.sprite.Sprite):
         
         while 1:
             #self.x=1
-            runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])           
+            runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])  
+    def control_wait(self,flag:str):
+        #未完
+        import time
+        sleeptime=dic=S_eval(self,flag)
+        time.sleep(0)                 
 
 def runcode(sprite:Sprite,flag:str)->any:
     global done
@@ -103,13 +106,12 @@ def runcode(sprite:Sprite,flag:str)->any:
     clock.tick(20)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
+
 def run(sprite:"Sprite") -> None:
     flag:str
     code:dict
 
-    logging.info(sprite.name+"进入run函数")
-    
-    
+    logging.info(sprite.name+"进入run函数")   
     for flag,code in sprite.blocks.items():#code是字母后面的括号
         if code["opcode"]=="event_whenflagclicked":
             #print(flag)
@@ -119,9 +121,8 @@ def run(sprite:"Sprite") -> None:
 
 #主程序从这里开始            
 t=json.loads(open("project.json","r",encoding="utf-8").read())   
-#print(t["targets"][1]["y"]) 
-sprite_list=[]
-threads=[]
+sprite_list=[]#角色们
+threads=[]#执行线程们
 done = False#done是用来标记程序是否运行，False代表运行，true代表结束
 clock = pygame.time.Clock()
 for i in t["targets"]:
@@ -129,11 +130,9 @@ for i in t["targets"]:
     
     sprite=Sprite(i)
     sprite_list.append(sprite)
-    #sprite.x=t["targets"][1]["y"]
-    #print(sprite,sprite.name)
     td = threading.Thread(target=run, name=sprite.name,args=(sprite,))
     threads.append(td)
-    td.start()
+    td.start()#开启执行线程
 
 
 # 初始化Pygame
@@ -143,30 +142,19 @@ screen = pygame.display.set_mode(STAGE_SIZE)
 # 设置窗口标题
 pygame.display.set_caption("My Game")
 
-
-
-
-#sprite_list[1].x=0;sprite_list[1].y=0;sprite_list[1].direction=0#我那天脑残写了这行
+# 渲染线程主循环
 while not done:
     # 处理事件
-    #sprite_list[1].motion_gotoxy("a")
-    #breakpoint()
-    #list1[1].motion_turnright("c")
-    #list1[1].direction+=1
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
 
     # 填充窗口颜色
     screen.fill((255, 255, 255))
-
-    for i in sprite_list:
-        
-            #i.x=100
+    
+    # 逐个角色更新窗口
+    for i in sprite_list:        
         i.draw()
-
-    
-    
 
     # 更新窗口
     pygame.display.update()
