@@ -98,7 +98,7 @@ def runcode(sprite:Sprite,flag:str)->any:
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
     try:
         sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
-    except:
+    except AttributeError:
         logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
     clock.tick(20)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
