@@ -42,11 +42,7 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
     
     则返回值为
     {'X': '0', 'Y': '0'}
-    
-    
-    
-    
-    
+     
     """
     
 
@@ -117,8 +113,8 @@ class Sprite():
 
 def runcode(sprite:Sprite,flag:str)->any:
     global done
-    if done:
-        
+    sprite.direction%=360#这里解决角度超出[0,360]范围的问题
+    if done:        
         exit()
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
     try:
@@ -130,6 +126,8 @@ def runcode(sprite:Sprite,flag:str)->any:
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
 
 def run(sprite:"Sprite") -> None:
+    
+
     flag:str
     code:dict
 
