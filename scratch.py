@@ -4,6 +4,8 @@ import threading#多线程并行需要
 from math import sin,cos,radians
 import logging
 import time
+FPS=50
+TPS=50
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
 POSITION = (0,0)
@@ -68,6 +70,7 @@ class Sprite():
     
     def draw(self)->None:
         costume=self.costumes[self.currentCostume]
+        
         image = pygame.image.load(costume["md5ext"])
         if "svg" != costume["dataFormat"]:
             image=pygame.transform.rotozoom(image, 0, 0.5)#位图精度高，实际储存时图像会大一些
@@ -75,13 +78,29 @@ class Sprite():
             screen.blit(image,(0,0))
             return
         
-        #logging.info(self.x+costume["rotationCenterX"])
-        image = pygame.transform.rotate(image, self.direction-90)
-        x,y=positionmap(self.x,self.y)
+        direction=self.direction#不是stage才有direction
+        w,h=image.get_size()
+        #logging.debug(image.get_size())
+        #logging.info(self.x+costume["rotationCenterX"])  +(w*cos(radians(direction-180))-h) -(h-h*cos(radians(direction-90)))
+        image = pygame.transform.rotate(image, -(self.direction-90))
+        direction%=360#这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
+        if direction<90:
+            x,y=positionmap(self.x,
+                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction)))
+                        )
+        elif direction<=180 : 
+            x,y=positionmap(self.x,
+                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction-90))))   
+        elif direction<=270 : 
+            x,y=positionmap(self.x,
+                        self.y+costume["rotationCenterY"]-(w-w*cos(radians(direction-180))))  
+        elif direction<=360 : 
+            x,y=positionmap(self.x,
+                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction-270))))      
         screen.blit(image,(x,y)
                     
         )
-        logging.debug(self.direction)
+        
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
     def motion_movesteps(self,flag:str) -> None :
@@ -97,10 +116,10 @@ class Sprite():
         self.y=int(dic["Y"])
     def motion_turnright(self,flag:str) -> None:
         addition=S_eval(self,flag)["DEGREES"]
-        self.direction-=int(addition)
+        self.direction+=int(addition)
     def motion_turnleft(self,flag:str) -> None:
         addition=S_eval(self,flag)["DEGREES"]
-        self.direction+=int(addition)    
+        self.direction-=int(addition)    
     def event_whenflagclicked(self,flag) -> None:
         runcode(self,self.blocks[flag]["next"]  ) 
     def control_if(self,flag:str) -> None:
@@ -127,6 +146,8 @@ class Sprite():
         self.direction=direction                  
 
 def runcode(sprite:Sprite,flag:str)->any:
+    logging.debug(sprite.direction)
+    
     global done
     if done:        
         exit()
@@ -145,7 +166,7 @@ def runcode(sprite:Sprite,flag:str)->any:
         sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
     except AttributeError:
         logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
-    clock.tick(5)
+    clock.tick(TPS)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
 
@@ -203,7 +224,7 @@ while not done:
 
     # 更新窗口
     pygame.display.update()
-    clock.tick(50)
+    clock.tick(FPS)
 
 # 退出Pygame 
 logging.info("退出程序")
