@@ -195,13 +195,15 @@ def runcode(sprite:Sprite,flag:str)->any:
     sprite.direction%=360#这里解决角度超出[0,360]范围的问题
 
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
+    result=None
     try:
-        return sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+        result=sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
     except AttributeError:
         logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
     clock.tick(TPS)
     if sprite.blocks[flag]["next"]!=None:#如果还有接着的积木，执行下去  
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
+    return result    
 
 def run(sprite:"Sprite") -> None:
     
