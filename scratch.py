@@ -15,10 +15,12 @@ logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] line%(lineno)s-%
 
 
 # 自定义坐标转换函数
-def positionmap(x:int, y:int)->tuple:
+def positionmap1(x:int, y:int)->tuple:
     """
+
     自定义坐标转换函数
-    pygame的坐标系不一样，要将其转换成sctatch的坐标系    
+    pygame的坐标系不一样，要将其转换成sctatch的坐标系 
+    从scratch坐标系到pygame   
     
     """
     ORIGIN_X = STAGE_SIZE[0] // 2
@@ -26,7 +28,18 @@ def positionmap(x:int, y:int)->tuple:
     new_x = x + ORIGIN_X
     new_y = -y + ORIGIN_Y
     return new_x, new_y
-
+def positionmap2(x:int, y:int)->tuple:
+    """
+    自定义坐标转换函数
+    pygame的坐标系不一样，要将其转换成sctatch的坐标系    
+    从pygame到scratch
+    
+    """
+    ORIGIN_X = STAGE_SIZE[0] // 2
+    ORIGIN_Y = STAGE_SIZE[1] // 2
+    new_x =  x-ORIGIN_X
+    new_y =  ORIGIN_Y-y
+    return new_x, new_y
 
 
 
@@ -52,14 +65,18 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
 
     result={}
     input1:dict=sprite.blocks[flag]["inputs"]
+    if sprite.blocks[flag]["opcode"]=="motion_goto_menu" :
+        #logging.debug(sprite.blocks[flag]["fields"]["TO"][0])
+        return {"TO":sprite.blocks[flag]["fields"]["TO"][0]}
     for i,j in input1.items():
         if isinstance(j[1],list):
             result[i]=j[1][1]
         else:
             result[i]=runcode(sprite,j[1])
-            logging.debug(result)
+    logging.debug(result)
     
-    return result        
+    return result   
+     
 class Sprite():
     def __init__(self,dict1:dict) -> None:        
         for name,value in dict1.items():#原来仅仅改变__dict__会带来问题
@@ -87,19 +104,38 @@ class Sprite():
         direction%=360
         #image=custom_rotate(image, 90-direction, (100,0))
         #这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
-        x,y=positionmap(self.x,self.y)   
+        x,y=positionmap1(self.x,self.y)   
         #blitRotate(screen, image, pos, (w/2, h/2), angle) 
         #screen.blit(image,(x,y))
                     
         w, h = image.get_size() 
-        logging.debug((w,h))     
+        #logging.debug((w,h))     
         rotatecentre=costume["rotationCenterX"],costume["rotationCenterY"] 
         #pos = (screen.get_width()/2, screen.get_height()/2)
-        logging.info((x,y,w,h))
+        #logging.info((x,y,w,h))
         blitRotate(screen, image, (x,y), rotatecentre, 90-direction)
         
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
-
+    def motion_goto(self,flag):
+        dict1=S_eval(self,flag)
+        logging.debug(dict1)
+        to=dict1["TO"]
+        self.x,self.y=to    
+    def motion_goto_menu(self,flag):
+        dict1=S_eval(self,flag)
+        logging.debug(dict1)
+        to=dict1["TO"]
+        if to=="_random_":
+            import random
+            y=random.uniform(-180,180)
+            x=random.uniform(-240,240)
+            logging.debug(positionmap2(x,y))
+            return (x,y)
+        if to=="_mouse_":
+            mousepos=pygame.mouse.get_pos()
+            
+            return positionmap2(mousepos[0],mousepos[1])
+            
     def motion_movesteps(self,flag:str) -> None :
         steps:int=int(S_eval(self,flag)["STEPS"]) 
         #logging.info(self.direction)
@@ -160,7 +196,7 @@ def runcode(sprite:Sprite,flag:str)->any:
 
     logging.info("将进入"+sprite.name+"的"+sprite.blocks[flag]["opcode"]+"函数")
     try:
-        sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+        return sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
     except AttributeError:
         logging.error("缺少函数"+sprite.blocks[flag]["opcode"])    
     clock.tick(TPS)
