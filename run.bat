@@ -1,3 +1,3 @@
 del *.svg *.json *.png
-7z.exe e  作品.sb3
+7za.exe e  作品.sb3
 python scratch.py
