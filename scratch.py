@@ -4,6 +4,7 @@ import threading#多线程并行需要
 from math import sin,cos,radians
 import logging
 import time
+from rotate import blitRotate
 FPS=50
 TPS=50
 # 设置窗口大小
@@ -79,27 +80,22 @@ class Sprite():
             return
         
         direction=self.direction#不是stage才有direction
-        w,h=image.get_size()
+        
         #logging.debug(image.get_size())
         #logging.info(self.x+costume["rotationCenterX"])  +(w*cos(radians(direction-180))-h) -(h-h*cos(radians(direction-90)))
         image = pygame.transform.rotate(image, -(self.direction-90))
-        direction%=360#这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
-        if direction<90:
-            x,y=positionmap(self.x,
-                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction)))
-                        )
-        elif direction<=180 : 
-            x,y=positionmap(self.x,
-                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction-90))))   
-        elif direction<=270 : 
-            x,y=positionmap(self.x,
-                        self.y+costume["rotationCenterY"]-(w-w*cos(radians(direction-180))))  
-        elif direction<=360 : 
-            x,y=positionmap(self.x,
-                        self.y+costume["rotationCenterY"]-(h-h*cos(radians(direction-270))))      
-        screen.blit(image,(x,y)
+        direction%=360
+        #image=custom_rotate(image, 90-direction, (100,0))
+        #这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
+        x,y=positionmap(self.x,self.y)   
+        #blitRotate(screen, image, pos, (w/2, h/2), angle) 
+        #screen.blit(image,(x,y))
                     
-        )
+        w, h = image.get_size()      
+        rotatecentre=costume["rotationCenterX"],costume["rotationCenterY"]   
+        #pos = (screen.get_width()/2, screen.get_height()/2)
+        logging.info((x,y,w,h))
+        blitRotate(screen, image, (x,y), (w/2, h/2), 90-direction)
         
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 

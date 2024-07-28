@@ -9,11 +9,19 @@
 
 import pygame
 
-pygame.init()
-screen = pygame.display.set_mode((300, 300))
-clock = pygame.time.Clock()
+
 
 def blitRotate(surf, image, pos, originPos, angle):
+    """
+    按中心旋转并绘制
+    surf 绘图的那个画板，目的是在调用时绘制
+    image 要旋转的图片
+    pos 图像绘制位置
+    originpos 图像旋转中心，在总的pygame坐标系中
+    angle 旋转角度
+
+    
+    """
 
     # offset from pivot to center
     image_rect = image.get_rect(topleft = (pos[0] - originPos[0], pos[1]-originPos[1]))
@@ -42,7 +50,10 @@ def blitRotate2(surf, image, topleft, angle):
 
     surf.blit(rotated_image, new_rect.topleft)
     pygame.draw.rect(surf, (255, 0, 0), new_rect, 2)
-
+"""
+pygame.init()
+screen = pygame.display.set_mode((300, 300))
+clock = pygame.time.Clock()
 image = pygame.image.load('dc05463bfd05f0b5e4e39ea4e94e43fe.svg')
 w, h = image.get_size()
 
@@ -69,4 +80,4 @@ while not done:
     
 pygame.quit()
 exit()
-
+"""
