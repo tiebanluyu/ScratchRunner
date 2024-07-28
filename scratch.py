@@ -83,7 +83,7 @@ class Sprite():
         
         #logging.debug(image.get_size())
         #logging.info(self.x+costume["rotationCenterX"])  +(w*cos(radians(direction-180))-h) -(h-h*cos(radians(direction-90)))
-        image = pygame.transform.rotate(image, -(self.direction-90))
+        #image = pygame.transform.rotate(image, -(self.direction-90))
         direction%=360
         #image=custom_rotate(image, 90-direction, (100,0))
         #这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
@@ -91,11 +91,12 @@ class Sprite():
         #blitRotate(screen, image, pos, (w/2, h/2), angle) 
         #screen.blit(image,(x,y))
                     
-        w, h = image.get_size()      
-        rotatecentre=costume["rotationCenterX"],costume["rotationCenterY"]   
+        w, h = image.get_size() 
+        logging.debug((w,h))     
+        rotatecentre=costume["rotationCenterX"],costume["rotationCenterY"] 
         #pos = (screen.get_width()/2, screen.get_height()/2)
         logging.info((x,y,w,h))
-        blitRotate(screen, image, (x,y), (w/2, h/2), 90-direction)
+        blitRotate(screen, image, (x,y), rotatecentre, 90-direction)
         
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
 
