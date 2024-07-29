@@ -116,12 +116,12 @@ class Sprite():
         blitRotate(screen, image, (x,y), rotatecentre, 90-direction)
         
         #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
-    def motion_goto(self,flag):
+    def motion_goto(self,flag) -> None:
         dict1=S_eval(self,flag)
         logging.debug(dict1)
         to=dict1["TO"]
         self.x,self.y=to    
-    def motion_goto_menu(self,flag):
+    def motion_goto_menu(self,flag)-> tuple[float, float]:
         dict1=S_eval(self,flag)
         logging.debug(dict1)
         to=dict1["TO"]
@@ -169,8 +169,7 @@ class Sprite():
         while 1:
             #self.x=1
             runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])  
-    def control_wait(self,flag:str):
-        #未完
+    def control_wait(self,flag:str) -> None:        
         
         sleeptime=float(S_eval(self,flag)["DURATION"])
         time.sleep(sleeptime)   
@@ -219,47 +218,53 @@ def run(sprite:"Sprite") -> None:
             runcode(sprite,flag)
     logging.info(f"{sprite}执行完毕")        
 
-
-#主程序从这里开始            
-t=json.loads(open("project.json","r",encoding="utf-8").read())   
-sprite_list=[]#角色们
-threads=[]#执行线程们
-done = False#done是用来标记程序是否运行，False代表运行，true代表结束
-clock = pygame.time.Clock()
-for i in t["targets"]:
-    i:dict
+def main():
+    global screen,done,clock
+    #主程序从这里开始            
+    t=json.loads(open("project.json","r",encoding="utf-8").read())   
+    sprite_list=[]#角色们
+    threads=[]#执行线程们
+    done = False#done是用来标记程序是否运行，False代表运行，true代表结束
+    clock = pygame.time.Clock()
+    for i in t["targets"]:
+        i:dict
     
-    sprite=Sprite(i)
-    sprite_list.append(sprite)
-    td = threading.Thread(target=run, name=sprite.name,args=(sprite,))
-    threads.append(td)
-    td.start()#开启执行线程
+        sprite=Sprite(i)
+        sprite_list.append(sprite)
+        td = threading.Thread(target=run, name=sprite.name,args=(sprite,))
+        threads.append(td)
+        td.start()#开启执行线程
 
 
-# 初始化Pygame
-pygame.init()
-screen = pygame.display.set_mode(STAGE_SIZE)
+    # 初始化Pygame
+    pygame.init()
+    screen = pygame.display.set_mode(STAGE_SIZE)
 
-# 设置窗口标题
-pygame.display.set_caption("My Game")
+    # 设置窗口标题
+    pygame.display.set_caption("My Game")
 
-# 渲染线程主循环
-while not done:
+    # 渲染线程主循环
+    while not done:
     # 处理事件
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
 
-    # 填充窗口颜色
-    screen.fill((255, 255, 255))
+        # 填充窗口颜色
+        screen.fill((255, 255, 255))
 
-    # 逐个角色更新窗口
-    for i in sprite_list:        
-        i.draw()
+        # 逐个角色更新窗口
+        for i in sprite_list:        
+            i.draw()
 
-    # 更新窗口
-    pygame.display.update()
-    clock.tick(FPS)
+        # 更新窗口
+        pygame.display.update()
+        clock.tick(FPS)
 
-# 退出Pygame 
-logging.info("退出程序")
+    # 退出Pygame 
+    logging.info("退出程序")
+
+
+
+if __name__=="__main__":
+    main()    
