@@ -65,7 +65,7 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
 
     result={}
     input1:dict=sprite.blocks[flag]["inputs"]
-    if sprite.blocks[flag]["opcode"]=="motion_goto_menu" :
+    if sprite.blocks[flag]["opcode"] in ["motion_goto_menu","motion_glideto_menu" ]:
         #logging.debug(sprite.blocks[flag]["fields"]["TO"][0])
         return {"TO":sprite.blocks[flag]["fields"]["TO"][0]}
     for i,j in input1.items():
@@ -121,7 +121,7 @@ class Sprite():
         logging.debug(dict1)
         to=dict1["TO"]
         self.x,self.y=to    
-    def motion_goto_menu(self,flag)-> tuple[float, float]:
+    def motion_goto_menu(self,flag)-> tuple[float, float]:        
         dict1=S_eval(self,flag)
         logging.debug(dict1)
         to=dict1["TO"]
@@ -135,7 +135,7 @@ class Sprite():
             mousepos=pygame.mouse.get_pos()
             
             return positionmap2(mousepos[0],mousepos[1])
-            
+    motion_glideto_menu=motion_goto_menu        
     def motion_movesteps(self,flag:str) -> None :
         steps:int=int(S_eval(self,flag)["STEPS"]) 
         #logging.info(self.direction)
@@ -175,10 +175,46 @@ class Sprite():
         time.sleep(sleeptime)   
     def motion_pointindirection(self,flag)->None:
         direction=float(S_eval(self,flag)["DIRECTION"])
-        self.direction=direction                  
+        self.direction=direction       
+
+    def motion_glideto(self,flag):
+        logging.debug("这里是motion_glideto")
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+
+        secs,to=dic["SECS"] ,dic["TO"]  
+        logging.debug((secs,to))
+        vec=(
+            (to[0]-self.x)/100,
+            (to[1]-self.y)/100
+             )           
+        for i in range(100):
+            import time 
+            time.sleep(float(secs)/100)
+            self.x+=vec[0]
+            self.y+=vec[1]
+    def motion_glidesecstoxy(self,flag):
+        logging.debug("这里是motion_glidesecstoxy")
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+
+        secs,x,y=dic["SECS"] ,dic["X"],dic["Y"]  
+        logging.debug((secs,x,y))
+        x=float(x)
+        y=float(y)
+        vec=(
+            (x-self.x)/100,
+            (y-self.y)/100
+             )           
+        for i in range(100):
+            import time 
+            time.sleep(float(secs)/100)
+            self.x+=vec[0]
+            self.y+=vec[1]
+
 
 def runcode(sprite:Sprite,flag:str)->any:
-    logging.debug(sprite.direction)
+    #logging.debug(sprite.direction)
     
     global done
     if done:        
