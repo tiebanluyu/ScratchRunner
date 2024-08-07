@@ -2,6 +2,7 @@ import json #需要读取project.json
 import pygame 
 import threading#多线程并行需要
 from math import sin,cos,radians
+import math
 import logging
 import time
 from rotate import blitRotate
@@ -68,12 +69,15 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
     if sprite.blocks[flag]["opcode"] in ["motion_goto_menu","motion_glideto_menu" ]:
         #logging.debug(sprite.blocks[flag]["fields"]["TO"][0])
         return {"TO":sprite.blocks[flag]["fields"]["TO"][0]}
+    if sprite.blocks[flag]["opcode"] in ["motion_pointtowards_menu" ]:
+        #logging.debug({"TOWARDS":sprite.blocks[flag]["fields"]["TOWARDS"][0]})
+        return {"TOWARDS":sprite.blocks[flag]["fields"]["TOWARDS"][0]}
     for i,j in input1.items():
         if isinstance(j[1],list):
             result[i]=j[1][1]
         else:
             result[i]=runcode(sprite,j[1])
-    logging.debug(result)
+    #logging.debug(result)
     
     return result   
      
@@ -97,13 +101,9 @@ class Sprite():
             return
         
         direction=self.direction#不是stage才有direction
-        
-        #logging.debug(image.get_size())
-        #logging.info(self.x+costume["rotationCenterX"])  +(w*cos(radians(direction-180))-h) -(h-h*cos(radians(direction-90)))
-        #image = pygame.transform.rotate(image, -(self.direction-90))
+
         direction%=360
-        #image=custom_rotate(image, 90-direction, (100,0))
-        #这里解决角度超出[0,360]范围的问题，角度来不及换算会带来问题
+
         x,y=positionmap1(self.x,self.y)   
         #blitRotate(screen, image, pos, (w/2, h/2), angle) 
         #screen.blit(image,(x,y))
@@ -217,14 +217,50 @@ class Sprite():
     def motion_sety(self,flag) -> None:
         y=S_eval(self,flag)["Y"]
         self.y=float(y) 
-    def motion_changexby(self,flag):
+    def motion_changexby(self,flag) -> None:
         dx=S_eval(self,flag)["DX"]
         self.x+=float(dx)       
-    def motion_changeyby(self,flag):
+    def motion_changeyby(self,flag) -> None:
         dy=S_eval(self,flag)["DY"]
         self.y+=float(dy)                              
+    def motion_pointtowards(self,flag) -> None:
+        dic=S_eval(self,flag)
+        self.direction=dic["TOWARDS"]
+    def motion_pointtowards_menu(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        if dic["TOWARDS"]=="_mouse_":
+            mousepos=pygame.mouse.get_pos()
+            mousepos=positionmap2(mousepos[0],mousepos[1])
+            logging.debug(mousepos)
+            dx=mousepos[0]-self.x;dy=mousepos[1]-self.y
+            direction=90-math.degrees(math.atan2(dy,dx))
+            return direction
+        else:
+            import random
+            direction=random.uniform(0,360)
+            
+            
+            return direction
 
 
+        #return dic["TOWARDS"]
+    def motion_ifonedgebounce(self,flag):
+        #dic=S_eval(self,flag)
+        #logging.debug(dic)
+        logging.debug(self.x)
+        if not (-240<=self.x<=240):
+            self.direction= -self.direction 
+            if self.x<0:
+                self.x=-480-self.x
+            else:
+                self.x=480-self.x    
+        if not (-180<=self.y<=180):
+            self.direction= 180-self.direction 
+            if self.y<0:
+                self.y=-360-self.y
+            else:
+                self.y=360-self.y          
 def runcode(sprite:Sprite,flag:str)->any:
     #logging.debug(sprite.direction)
     
