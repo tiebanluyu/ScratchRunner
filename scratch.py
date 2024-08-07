@@ -12,7 +12,7 @@ TPS=50
 STAGE_SIZE = (480, 360)
 POSITION = (0,0)
 
-logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] line%(lineno)s-%(message)s')
+logging.basicConfig(level=logging.WARNING,format='[%(levelname)s] line%(lineno)s-%(message)s')
 
 
 # 自定义坐标转换函数
@@ -299,7 +299,9 @@ def run(sprite:"Sprite") -> None:
         if code["opcode"]=="event_whenflagclicked":
             #print(flag)
             flag=code["next"]
-            runcode(sprite,flag)
+            thread=threading.Thread(name=str(sprite)+flag,target=runcode,args=(sprite,flag))
+            thread.start()
+            #runcode(sprite,flag)
     logging.info(f"{sprite}执行完毕")        
 
 def main():
