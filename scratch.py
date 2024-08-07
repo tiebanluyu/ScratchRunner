@@ -193,7 +193,7 @@ class Sprite():
             time.sleep(float(secs)/100)
             self.x+=vec[0]
             self.y+=vec[1]
-    def motion_glidesecstoxy(self,flag):
+    def motion_glidesecstoxy(self,flag) -> None:
         logging.debug("这里是motion_glidesecstoxy")
         dic=S_eval(self,flag)
         logging.debug(dic)
@@ -211,6 +211,18 @@ class Sprite():
             time.sleep(float(secs)/100)
             self.x+=vec[0]
             self.y+=vec[1]
+    def motion_setx(self,flag) -> None:
+        x=S_eval(self,flag)["X"]
+        self.x=float(x)      
+    def motion_sety(self,flag) -> None:
+        y=S_eval(self,flag)["Y"]
+        self.y=float(y) 
+    def motion_changexby(self,flag):
+        dx=S_eval(self,flag)["DX"]
+        self.x+=float(dx)       
+    def motion_changeyby(self,flag):
+        dy=S_eval(self,flag)["DY"]
+        self.y+=float(dy)                              
 
 
 def runcode(sprite:Sprite,flag:str)->any:
