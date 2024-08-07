@@ -4,7 +4,9 @@ import threading#多线程并行需要
 from math import sin,cos,radians
 import math
 import logging
-import time
+logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] line%(lineno)s-%(message)s')
+
+from time import sleep
 from rotate import blitRotate
 FPS=50
 TPS=50
@@ -12,17 +14,15 @@ TPS=50
 STAGE_SIZE = (480, 360)
 POSITION = (0,0)
 
-logging.basicConfig(level=logging.WARNING,format='[%(levelname)s] line%(lineno)s-%(message)s')
+
 
 
 # 自定义坐标转换函数
 def positionmap1(x:int, y:int)->tuple:
     """
-
     自定义坐标转换函数
     pygame的坐标系不一样，要将其转换成sctatch的坐标系 
     从scratch坐标系到pygame   
-    
     """
     ORIGIN_X = STAGE_SIZE[0] // 2
     ORIGIN_Y = STAGE_SIZE[1] // 2
@@ -66,18 +66,16 @@ def S_eval(sprite:"Sprite",flag:str)->dict:
 
     result={}
     input1:dict=sprite.blocks[flag]["inputs"]
-    if sprite.blocks[flag]["opcode"] in ["motion_goto_menu","motion_glideto_menu" ]:
-        #logging.debug(sprite.blocks[flag]["fields"]["TO"][0])
+    if sprite.blocks[flag]["opcode"] in ["motion_goto_menu","motion_glideto_menu" ]:        
         return {"TO":sprite.blocks[flag]["fields"]["TO"][0]}
-    if sprite.blocks[flag]["opcode"] in ["motion_pointtowards_menu" ]:
-        #logging.debug({"TOWARDS":sprite.blocks[flag]["fields"]["TOWARDS"][0]})
+    if sprite.blocks[flag]["opcode"] in ["motion_pointtowards_menu" ]:        
         return {"TOWARDS":sprite.blocks[flag]["fields"]["TOWARDS"][0]}
     for i,j in input1.items():
         if isinstance(j[1],list):
             result[i]=j[1][1]
         else:
             result[i]=runcode(sprite,j[1])
-    #logging.debug(result)
+    #logging.debug(result)#这行随时要用
     
     return result   
      
@@ -100,36 +98,25 @@ class Sprite():
             screen.blit(image,(0,0))
             return
         
-        direction=self.direction#不是stage才有direction
-
-        direction%=360
-
-        x,y=positionmap1(self.x,self.y)   
-        #blitRotate(screen, image, pos, (w/2, h/2), angle) 
-        #screen.blit(image,(x,y))
-                    
-        w, h = image.get_size() 
-        #logging.debug((w,h))     
+        direction=self.direction%360#不是stage才有direction        
+        x,y=positionmap1(self.x,self.y)          
         rotatecentre=costume["rotationCenterX"],costume["rotationCenterY"] 
-        #pos = (screen.get_width()/2, screen.get_height()/2)
-        #logging.info((x,y,w,h))
-        blitRotate(screen, image, (x,y), rotatecentre, 90-direction)
-        
-        #scratch造型的rotationCenterY是以左上角为原点，向右向下为正表述的
+        blitRotate(screen, image, (x,y), rotatecentre, 90-direction)#他山之石可以攻玉
+
     def motion_goto(self,flag) -> None:
         dict1=S_eval(self,flag)
-        logging.debug(dict1)
+        
         to=dict1["TO"]
         self.x,self.y=to    
     def motion_goto_menu(self,flag)-> tuple[float, float]:        
         dict1=S_eval(self,flag)
-        logging.debug(dict1)
+        
         to=dict1["TO"]
         if to=="_random_":
             import random
             y=random.uniform(-180,180)
             x=random.uniform(-240,240)
-            logging.debug(positionmap2(x,y))
+            
             return (x,y)
         if to=="_mouse_":
             mousepos=pygame.mouse.get_pos()
@@ -164,7 +151,7 @@ class Sprite():
         for _ in range(int(dic["TIMES"])):
             runcode(self,self.blocks[flag]["inputs"]["SUBSTACK"][1])       
     def control_forever(self,flag:str) -> None:
-        #logging.debug("111")
+        
         
         while 1:
             #self.x=1
@@ -172,43 +159,34 @@ class Sprite():
     def control_wait(self,flag:str) -> None:        
         
         sleeptime=float(S_eval(self,flag)["DURATION"])
-        time.sleep(sleeptime)   
+        sleep(sleeptime)   
     def motion_pointindirection(self,flag)->None:
         direction=float(S_eval(self,flag)["DIRECTION"])
         self.direction=direction       
 
-    def motion_glideto(self,flag):
-        logging.debug("这里是motion_glideto")
+    def motion_glideto(self,flag):        
         dic=S_eval(self,flag)
-        logging.debug(dic)
-
-        secs,to=dic["SECS"] ,dic["TO"]  
-        logging.debug((secs,to))
+        secs,to=dic["SECS"] ,dic["TO"]          
         vec=(
             (to[0]-self.x)/100,
             (to[1]-self.y)/100
              )           
-        for i in range(100):
-            import time 
-            time.sleep(float(secs)/100)
+        for _ in range(100):            
+            sleep(float(secs)/100)
             self.x+=vec[0]
             self.y+=vec[1]
-    def motion_glidesecstoxy(self,flag) -> None:
-        logging.debug("这里是motion_glidesecstoxy")
-        dic=S_eval(self,flag)
-        logging.debug(dic)
 
-        secs,x,y=dic["SECS"] ,dic["X"],dic["Y"]  
-        logging.debug((secs,x,y))
+    def motion_glidesecstoxy(self,flag) -> None:        
+        dic=S_eval(self,flag)
+        secs,x,y=dic["SECS"] ,dic["X"],dic["Y"]          
         x=float(x)
         y=float(y)
         vec=(
             (x-self.x)/100,
             (y-self.y)/100
              )           
-        for i in range(100):
-            import time 
-            time.sleep(float(secs)/100)
+        for _ in range(100):            
+            sleep(float(secs)/100)
             self.x+=vec[0]
             self.y+=vec[1]
     def motion_setx(self,flag) -> None:
@@ -227,28 +205,22 @@ class Sprite():
         dic=S_eval(self,flag)
         self.direction=dic["TOWARDS"]
     def motion_pointtowards_menu(self,flag):
-        dic=S_eval(self,flag)
-        logging.debug(dic)
+        dic=S_eval(self,flag)        
         if dic["TOWARDS"]=="_mouse_":
             mousepos=pygame.mouse.get_pos()
-            mousepos=positionmap2(mousepos[0],mousepos[1])
-            logging.debug(mousepos)
+            mousepos=positionmap2(mousepos[0],mousepos[1])            
             dx=mousepos[0]-self.x;dy=mousepos[1]-self.y
             direction=90-math.degrees(math.atan2(dy,dx))
             return direction
         else:
             import random
-            direction=random.uniform(0,360)
-            
-            
+            direction=random.uniform(0,360)            
             return direction
 
 
-        #return dic["TOWARDS"]
-    def motion_ifonedgebounce(self,flag):
-        #dic=S_eval(self,flag)
-        #logging.debug(dic)
-        logging.debug(self.x)
+        
+    def motion_ifonedgebounce(self,flag):        
+        #其实遇到边缘就反弹没有任何参数
         if not (-240<=self.x<=240):
             self.direction= -self.direction 
             if self.x<0:
@@ -262,18 +234,15 @@ class Sprite():
             else:
                 self.y=360-self.y          
 def runcode(sprite:Sprite,flag:str)->any:
-    #logging.debug(sprite.direction)
+    
     
     global done
     if done:        
         exit()
-    #logging.debug(("1234",sprite,flag))
+    
     if flag==None :
-        #logging.debug(f"flag==None,{sprite.direction}")
-        #sprite.direction+=1
-        #time.sleep(1)
         return
-    #logging.debug(("34567",sprite,flag))
+    
     
     sprite.direction%=360#这里解决角度超出[0,360]范围的问题
 
