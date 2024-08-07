@@ -288,43 +288,39 @@ def runcode(sprite:Sprite,flag:str)->any:
         runcode(sprite=sprite,flag=sprite.blocks[flag]["next"])  
     return result    
 
-def run(sprite:"Sprite") -> None:
-    
 
-    flag:str
-    code:dict
+       
 
-    logging.info(sprite.name+"进入run函数")   
-    for flag,code in sprite.blocks.items():#code是字母后面的括号
-        if code["opcode"]=="event_whenflagclicked":
-            #print(flag)
-            flag=code["next"]
-            thread=threading.Thread(name=str(sprite)+flag,target=runcode,args=(sprite,flag))
-            thread.start()
-            #runcode(sprite,flag)
-    logging.info(f"{sprite}执行完毕")        
+           
 
 def main():
     global screen,done,clock
     #主程序从这里开始            
+        # 初始化Pygame
+    pygame.init()
+    screen = pygame.display.set_mode(STAGE_SIZE)
+
     t=json.loads(open("project.json","r",encoding="utf-8").read())   
     sprite_list=[]#角色们
-    threads=[]#执行线程们
+
     done = False#done是用来标记程序是否运行，False代表运行，true代表结束
     clock = pygame.time.Clock()
     for i in t["targets"]:
-        i:dict
-    
+        i:dict    
         sprite=Sprite(i)
         sprite_list.append(sprite)
-        td = threading.Thread(target=run, name=sprite.name,args=(sprite,))
-        threads.append(td)
-        td.start()#开启执行线程
+        for flag,code in sprite.blocks.items():
+            if code["opcode"]=="event_whenflagclicked":
+                #print(flag)
+                flag=code["next"]
+                thread=threading.Thread(name=str(sprite)+flag,target=runcode,args=(sprite,flag))
+                thread.start()
+                #runcode(sprite,flag)
 
 
-    # 初始化Pygame
-    pygame.init()
-    screen = pygame.display.set_mode(STAGE_SIZE)
+
+
+
 
     # 设置窗口标题
     pygame.display.set_caption("My Game")
