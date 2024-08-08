@@ -5,6 +5,8 @@ from math import sin, cos, radians
 import math
 import logging
 import random
+import zipfile
+import os
 
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -285,6 +287,10 @@ def main():
     # 初始化Pygame
     pygame.init()
     screen = pygame.display.set_mode(STAGE_SIZE)
+    with zipfile.ZipFile("作品.sb3") as f:
+        filenamelist=f.namelist()
+        #logging.debug(f.namelist())
+        f.extractall()
 
     t = json.loads(open("project.json", "r", encoding="utf-8").read())
     sprite_list = []  # 角色们
@@ -328,6 +334,8 @@ def main():
 
     # 退出Pygame
     logging.info("退出程序")
+    for filename in filenamelist:
+        os.remove(filename)
 
 
 if __name__ == "__main__":
