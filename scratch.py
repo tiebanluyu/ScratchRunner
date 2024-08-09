@@ -84,12 +84,23 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
 
     return result
 
+class Fountage(pygame.sprite.Sprite):
+    def __init__(self):
+        self.image=self.rect=pygame.rect.Rect(0,0,480,360)
+        self.x=self.y=0
 
-class Sprite:
+
+class Sprite(pygame.sprite.Sprite):
     def __init__(self, dict1: dict) -> None:
+        super().__init__()
         for name, value in dict1.items():  # 原来仅仅改变__dict__会带来问题
             setattr(self, name, value)
 
+
+
+    def update(self):
+        pass
+   
     def __str__(self) ->str:
         return self.name
 
@@ -111,9 +122,10 @@ class Sprite:
         direction = self.direction % 360  # 不是stage才有direction
         x, y = positionmap1(self.x, self.y)
         rotatecentre = costume["rotationCenterX"], costume["rotationCenterY"]
-        blitRotate(
+        self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
+        self.mask = pygame.mask.from_surface(self.image)
 
     def motion_goto(self, flag) -> None:
         dict1 = S_eval(self, flag)
@@ -243,18 +255,28 @@ class Sprite:
 
     def motion_ifonedgebounce(self, flag:str):
         # 其实遇到边缘就反弹没有任何参数
-        if not (-240 <= self.x <= 240):
+        """
+        if pygame.sprite.spritecollide(self,[fountage],False):
+            logging.debug((self.rect.right))
+            #return"""
+        
+        if not (0 <=self.rect.left <= self.rect.right <= 480):
             self.direction = -self.direction
+            logging.debug("碰撞")
+            logging.debug((self.rect.left,self.rect.right))
+            """
             if self.x < 0:
                 self.x = -480 - self.x
             else:
-                self.x = 480 - self.x
-        if not (-180 <= self.y <= 180):
+                self.x = 480 - self.x"""
+
+        if not (0 <= self.rect.top <= self.rect.bottom <= 360):
             self.direction = 180 - self.direction
+            """
             if self.y < 0:
                 self.y = -360 - self.y
             else:
-                self.y = 360 - self.y
+                self.y = 360 - self.y"""
 
 
 def runcode(sprite: Sprite, flag: str)  :
@@ -282,7 +304,7 @@ def runcode(sprite: Sprite, flag: str)  :
 
 
 def main():
-    global screen, done, clock
+    global screen, done, clock,fountage
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
@@ -297,6 +319,7 @@ def main():
 
     done = False  # done是用来标记程序是否运行，False代表运行，true代表结束
     clock = pygame.time.Clock()
+    fountage=Fountage()
     for i in t["targets"]:
         i: dict
         sprite = Sprite(i)
@@ -326,6 +349,7 @@ def main():
 
         # 逐个角色更新窗口
         for i in sprite_list:
+            #i.update()
             i.draw()
 
         # 更新窗口

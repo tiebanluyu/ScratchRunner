@@ -1,5 +1,6 @@
 import pygame
-def blitRotate(surf, image, pos, originPos, angle):
+import logging
+def blitRotate(surf, image, pos, originPos, angle,bilt=True):
     """
     按中心旋转并绘制
     surf 绘图的那个画板，目的是在调用时绘制
@@ -26,7 +27,10 @@ def blitRotate(surf, image, pos, originPos, angle):
     rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
 
     # rotate and blit the image
-    surf.blit(rotated_image, rotated_image_rect)
+    logging.debug(rotated_image_rect)
+    if bilt:
+        surf.blit(rotated_image, rotated_image_rect)
+    return rotated_image, rotated_image_rect    
   
     # draw rectangle around the image 我不用这个
     #pygame.draw.rect(surf, (255, 0, 0), (*rotated_image_rect.topleft, *rotated_image.get_size()),2)
