@@ -84,11 +84,6 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
 
     return result
 
-class Fountage(pygame.sprite.Sprite):
-    def __init__(self):
-        self.image=self.rect=pygame.rect.Rect(0,0,480,360)
-        self.x=self.y=0
-
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, dict1: dict) -> None:
@@ -96,11 +91,6 @@ class Sprite(pygame.sprite.Sprite):
         for name, value in dict1.items():  # 原来仅仅改变__dict__会带来问题
             setattr(self, name, value)
 
-
-
-    def update(self):
-        pass
-   
     def __str__(self) ->str:
         return self.name
 
@@ -114,7 +104,7 @@ class Sprite(pygame.sprite.Sprite):
         if "svg" != costume["dataFormat"]:
             image = pygame.transform.rotozoom(
                 image, 0, 0.5
-            )  # 位图精度高，实际储存时图像会大一些
+            )  # 位图精度高（否则一个一个点不美观），实际储存时图像会大一些
         if self.isStage:
             screen.blit(image, (0, 0))
             return
@@ -125,7 +115,7 @@ class Sprite(pygame.sprite.Sprite):
         self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
-        self.mask = pygame.mask.from_surface(self.image)
+        #self.mask = pygame.mask.from_surface(self.image)
 
     def motion_goto(self, flag) -> None:
         dict1 = S_eval(self, flag)
@@ -254,29 +244,31 @@ class Sprite(pygame.sprite.Sprite):
             return direction
 
     def motion_ifonedgebounce(self, flag:str):
-        # 其实遇到边缘就反弹没有任何参数
-        """
-        if pygame.sprite.spritecollide(self,[fountage],False):
-            logging.debug((self.rect.right))
-            #return"""
-        
+        # 其实遇到边缘就反弹没有任何参数   
+        #logging.debug((self.x>0,((self.direction%360)>180)))    
         if not (0 <=self.rect.left <= self.rect.right <= 480):
-            self.direction = -self.direction
-            logging.debug("碰撞")
-            logging.debug((self.rect.left,self.rect.right))
+            
+            if (self.x>0)+((self.direction%360)>180)==1:#在已经转向的情况下不会转回去
+                self.direction = -self.direction
+                logging.debug("碰撞")
             """
             if self.x < 0:
                 self.x = -480 - self.x
             else:
                 self.x = 480 - self.x"""
 
+        logging.debug((self.y>0,(not (90<(self.direction%360)<270)))) 
         if not (0 <= self.rect.top <= self.rect.bottom <= 360):
-            self.direction = 180 - self.direction
-            """
-            if self.y < 0:
-                self.y = -360 - self.y
-            else:
-                self.y = 360 - self.y"""
+            if bool(self.y)+((self.direction%360)<90)==1:#没好
+                #self.direction = -self.direction
+                logging.debug("碰撞")
+               
+                    #if (self.y>0)+(not (90<(self.direction%360)<270))==1:#在已经转向的情况下不会转回去
+                #self.direction = -self.direction
+                #logging.debug("碰撞")
+                self.direction = 180 - self.direction
+            #logging.debug("碰撞")
+
 
 
 def runcode(sprite: Sprite, flag: str)  :
@@ -319,7 +311,7 @@ def main():
 
     done = False  # done是用来标记程序是否运行，False代表运行，true代表结束
     clock = pygame.time.Clock()
-    fountage=Fountage()
+    
     for i in t["targets"]:
         i: dict
         sprite = Sprite(i)
