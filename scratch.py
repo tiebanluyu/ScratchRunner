@@ -257,9 +257,9 @@ class Sprite(pygame.sprite.Sprite):
             else:
                 self.x = 480 - self.x"""
 
-        logging.debug((self.y>0,(not (90<(self.direction%360)<270)))) 
+        logging.debug((self.y>0,( (90<(self.direction%360)<270)))) 
         if not (0 <= self.rect.top <= self.rect.bottom <= 360):
-            if bool(self.y)+((self.direction%360)<90)==1:#没好
+            if bool(self.y>0)+(90<(self.direction%360)<270)==1:#没好
                 #self.direction = -self.direction
                 logging.debug("碰撞")
                
