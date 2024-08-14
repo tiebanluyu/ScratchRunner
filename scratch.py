@@ -9,12 +9,12 @@ import zipfile
 import os
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.INFO, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
 from rotate import blitRotate
-
+from variable import *
 FPS:int = 50
 TPS:int = 50
 # 设置窗口大小
@@ -268,7 +268,7 @@ class Sprite(pygame.sprite.Sprite):
                 #logging.debug("碰撞")
                 self.direction = 180 - self.direction
             #logging.debug("碰撞")
-
+    
 
 
 def runcode(sprite: Sprite, flag: str)  :
@@ -351,6 +351,8 @@ def main():
     # 退出Pygame
     logging.info("退出程序")
     for filename in filenamelist:
+        if logging.getLogger().level<=10:
+            break
         os.remove(filename)
 
 
