@@ -9,7 +9,7 @@ import zipfile
 import os
 
 logging.basicConfig(
-    level=logging.INFO, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.WARN, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -140,7 +140,7 @@ class Sprite(pygame.sprite.Sprite):
     motion_glideto_menu = motion_goto_menu
 
     def motion_movesteps(self, flag: str) -> None:
-        steps: int = int(S_eval(self, flag)["STEPS"])
+        steps: int = safe_int(S_eval(self, flag)["STEPS"])
         # logging.info(self.direction)
 
         x = steps * sin(radians(self.direction))
@@ -150,16 +150,17 @@ class Sprite(pygame.sprite.Sprite):
 
     def motion_gotoxy(self, flag: str) -> None:
         dic = S_eval(self, flag)
-        self.x = int(dic["X"])
-        self.y = int(dic["Y"])
+        self.x = safe_int(dic["X"])
+        self.y = safe_int(dic["Y"])
+        #print(dic)
 
     def motion_turnright(self, flag: str) -> None:
         addition = S_eval(self, flag)["DEGREES"]
-        self.direction += int(addition)
+        self.direction += safe_int(addition)
 
     def motion_turnleft(self, flag: str) -> None:
         addition = S_eval(self, flag)["DEGREES"]
-        self.direction -= int(addition)
+        self.direction -= safe_int(addition)
 
     def event_whenflagclicked(self, flag) -> None:
         runcode(self, self.blocks[flag]["next"])
@@ -170,7 +171,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def control_repeat(self, flag) -> None:
         dic = S_eval(self, flag)
-        for _ in range(int(dic["TIMES"])):
+        for _ in range(safe_int(dic["TIMES"])):
             runcode(self, self.blocks[flag]["inputs"]["SUBSTACK"][1])
 
     def control_forever(self, flag: str) -> None:
@@ -268,7 +269,34 @@ class Sprite(pygame.sprite.Sprite):
                 #logging.debug("碰撞")
                 self.direction = 180 - self.direction
             #logging.debug("碰撞")
-    
+    def motion_xposition(self,flag) ->str:
+        return safe_str(self.x)
+    def motion_yposition(self,flag) ->str:
+        return safe_str(self.y)
+    def motion_direction(self,flag) ->str:
+        return safe_str(self.direction)            
+    def operator_add(self,flag) -> str:
+        #logging.debug("hello")
+        dic=S_eval(self,flag)
+        num1=safe_float(dic["NUM1"])
+        num2=safe_float(dic["NUM2"])     
+        #logging.debug(safe_str(num1+num2))   
+        return safe_str(num1+num2)
+    def operator_subtract(self,flag) -> str:
+        dic=S_eval(self,flag)
+        num1=safe_float(dic["NUM1"])
+        num2=safe_float(dic["NUM2"])        
+        return safe_str(num1-num2)
+    def operator_multiply(self,flag) -> str:
+        dic=S_eval(self,flag)
+        num1=safe_float(dic["NUM1"])
+        num2=safe_float(dic["NUM2"])        
+        return safe_str(num1*num2)    
+    def operator_divide(self,flag) -> str:
+        dic=S_eval(self,flag)
+        num1=safe_float(dic["NUM1"])
+        num2=safe_float(dic["NUM2"])        
+        return safe_str(num1/num2)   
 
 
 def runcode(sprite: Sprite, flag: str)  :
