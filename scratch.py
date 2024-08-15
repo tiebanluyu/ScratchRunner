@@ -304,6 +304,15 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         message=dic["MESSAGE"]
         self.words=message
+    def looks_sayforsecs(self,flag):
+        dic=S_eval(self,flag)
+        secs=safe_float(dic["SECS"])
+        message=safe_str(dic["MESSAGE"])
+        self.words=message
+        sleep(secs)
+        self.words=""
+
+
 
 
 def runcode(sprite: Sprite, flag: str)  :
@@ -326,7 +335,7 @@ def runcode(sprite: Sprite, flag: str)  :
     except AttributeError:
         logging.error("缺少函数" + sprite.blocks[flag]["opcode"])
     else:
-        func(flag)    
+        result=func(flag)    
     clock.tick(TPS)
     if sprite.blocks[flag]["next"] != None:  # 如果还有接着的积木，执行下去
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
