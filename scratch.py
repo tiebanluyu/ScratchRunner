@@ -10,7 +10,7 @@ import os
 from drawtext import drawtext
 
 logging.basicConfig(
-    level=logging.WARN, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -76,6 +76,8 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"TO": sprite.blocks[flag]["fields"]["TO"][0]}
     if sprite.blocks[flag]["opcode"] in ["motion_pointtowards_menu"]:
         return {"TOWARDS": sprite.blocks[flag]["fields"]["TOWARDS"][0]}
+    if sprite.blocks[flag]["opcode"] in ["looks_costume"]:
+        return {"COSTUME": sprite.blocks[flag]["fields"]["COSTUME"][0]}
     for i, j in input1.items():
         if isinstance(j[1], list):
             result[i] = j[1][1]
@@ -304,6 +306,7 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         message=dic["MESSAGE"]
         self.words=message
+    looks_think=looks_say    
     def looks_sayforsecs(self,flag):
         dic=S_eval(self,flag)
         secs=safe_float(dic["SECS"])
@@ -311,6 +314,26 @@ class Sprite(pygame.sprite.Sprite):
         self.words=message
         sleep(secs)
         self.words=""
+    looks_thinkforsecs=looks_sayforsecs    
+    def looks_switchcostumeto(self,flag):
+        #logging.debug("dic")
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        # self.currentcostome=
+        count=0
+        for costome in self.costumes:
+            #logging.debug(costome["name"])
+            #logging.debug(dic["COSTUME"])
+            if costome["name"]==dic["COSTUME"]:
+                self.currentCostume=count                
+                break
+            count+=1
+    def looks_costume(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        return dic["COSTUME"]
+
+
 
 
 
