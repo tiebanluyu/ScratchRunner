@@ -7,6 +7,7 @@ import logging
 import random
 import zipfile
 import os
+from drawtext import drawtext
 
 logging.basicConfig(
     level=logging.WARN, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -24,7 +25,7 @@ POSITION = (0, 0)
 
 # 自定义坐标转换函数
 def positionmap1(x: int, y: int) -> tuple[int,int]:
-    """
+    """    
     自定义坐标转换函数
     pygame的坐标系不一样，要将其转换成sctatch的坐标系
     从scratch坐标系到pygame
@@ -90,6 +91,7 @@ class Sprite(pygame.sprite.Sprite):
         super().__init__()
         for name, value in dict1.items():  # 原来仅仅改变__dict__会带来问题
             setattr(self, name, value)
+        self.words=""    #没说话
 
     def __str__(self) ->str:
         return self.name
@@ -116,6 +118,7 @@ class Sprite(pygame.sprite.Sprite):
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
         #self.mask = pygame.mask.from_surface(self.image)
+        drawtext(self,screen)
 
     def motion_goto(self, flag) -> None:
         dict1 = S_eval(self, flag)
@@ -297,6 +300,10 @@ class Sprite(pygame.sprite.Sprite):
         num1=safe_float(dic["NUM1"])
         num2=safe_float(dic["NUM2"])        
         return safe_str(num1/num2)   
+    def looks_say(self,flag):
+        dic=S_eval(self,flag)
+        message=dic["MESSAGE"]
+        self.words=message
 
 
 def runcode(sprite: Sprite, flag: str)  :
@@ -314,9 +321,12 @@ def runcode(sprite: Sprite, flag: str)  :
     logging.info("将进入" + sprite.name + "的" + sprite.blocks[flag]["opcode"] + "函数")
     result = None
     try:
-        result = sprite.__getattribute__(sprite.blocks[flag]["opcode"])(flag)
+        func = sprite.__getattribute__(sprite.blocks[flag]["opcode"])
+        #print(func)
     except AttributeError:
         logging.error("缺少函数" + sprite.blocks[flag]["opcode"])
+    else:
+        func(flag)    
     clock.tick(TPS)
     if sprite.blocks[flag]["next"] != None:  # 如果还有接着的积木，执行下去
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
@@ -324,10 +334,12 @@ def runcode(sprite: Sprite, flag: str)  :
 
 
 def main():
+    
     global screen, done, clock,fountage
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
+    
     screen = pygame.display.set_mode(STAGE_SIZE)
     with zipfile.ZipFile("作品.sb3") as f:
         filenamelist=f.namelist()
