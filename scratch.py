@@ -451,7 +451,10 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         #logging.debug(dic)
         return safe_str(safe_bool(dic["OPERAND1"]) or safe_bool(dic["OPERAND2"]))
-        
+    def operator_not(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(not safe_bool(dic["OPERAND"]))    
 
 
 
