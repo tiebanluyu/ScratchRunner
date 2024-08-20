@@ -82,15 +82,29 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"COSTUME": sprite.blocks[flag]["fields"]["BACKDROP"][0]}
     if sprite.blocks[flag]["opcode"] in ["looks_costumenumbername","looks_backdropnumbername"]:
         return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
+    if sprite.blocks[flag]["opcode"] in ["data_setvariableto","data_changevariableby"]:
+        result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]}    
     for i, j in input1.items():
         if isinstance(j[1], list):
-            result[i] = j[1][1]
+            if len(j[1])==2:
+                result[i] = j[1][1]
+            else:
+                result[i]=getvaluable(sprite,j[1][2])    
         else:
             result[i] = runcode(sprite, j[1])
     # logging.debug(result)#这行随时要用
 
     return result
-
+def getvaluable(sprite,id):
+    if id in stage.variables:
+        return safe_str(stage.variables[id])
+    if id in sprite.variables:
+        return safe_str(sprite.variables[id])
+def setvaluable(sprite,id,obj):
+    if id in stage.variables:
+        stage.variables[id]= safe_str(obj)
+    if id in sprite.variables:
+        stage.variables[id]=safe_str(obj)
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, dict1: dict) -> None:
@@ -481,6 +495,23 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         logging.debug(dic)
         return safe_str(round(safe_float(dic["NUM"])))
+    def data_setvariableto(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        variable=dic["VARIABLE"]
+        value=dic["VALUE"]
+        self.variables[variable]=safe_str(value)
+    def data_changevariableby(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        variable=dic["VARIABLE"]
+        value=dic["VALUE"]
+        logging.debug((safe_float(value),safe_float(getvaluable(self,variable)),self.variables))
+        setvaluable(self,
+                    variable,
+                    safe_str(safe_float(value)+safe_float(getvaluable(self,variable)))
+                    )
+        logging.debug(self.variables)
         
 
 
@@ -495,8 +526,8 @@ def runcode(sprite: Sprite, flag: str)  :
 
     if flag == None:
         return
-
-    sprite.direction %= 360  # 这里解决角度超出[0,360]范围的问题
+    if not sprite.isStage:
+        sprite.direction %= 360  # 这里解决角度超出[0,360]范围的问题
 
     logging.info("将进入" + sprite.name + "的" + sprite.blocks[flag]["opcode"] + "函数")
     result = None
@@ -536,6 +567,13 @@ def main():
         i: dict
         sprite = Sprite(i)
         sprite_list.append(sprite)
+        sprite.variables={}
+        #logging.debug(sprite.variables)
+        for j in i["variables"].items():
+            #logging.debug(j)
+            sprite.variables[j[0]]=safe_str(j[1][1])
+        logging.info(f"提取{sprite}的变量"  )  
+        logging.info(sprite.variables)    
         if sprite.isStage:
             stage=sprite
         for flag, code in sprite.blocks.items():
