@@ -454,7 +454,34 @@ class Sprite(pygame.sprite.Sprite):
     def operator_not(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        return safe_str(not safe_bool(dic["OPERAND"]))    
+        return safe_str(not safe_bool(dic["OPERAND"]))
+    def operator_join(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(dic["STRING1"]+dic["STRING2"])
+    def operator_letter_of(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(dic["STRING"][safe_int(dic["LETTER"])])
+    def operator_length(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(len(dic["STRING"]))
+    def operator_contains(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(dic["STRING2"] in dic["STRING1"])
+    def operator_mod(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        num1=safe_int(dic["NUM1"])
+        num2=safe_int(dic["NUM2"])
+        return safe_str(num1%num2)
+    def operator_round(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(round(safe_float(dic["NUM"])))
+        
 
 
 
