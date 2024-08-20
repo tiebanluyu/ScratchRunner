@@ -78,6 +78,9 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"TOWARDS": sprite.blocks[flag]["fields"]["TOWARDS"][0]}
     if sprite.blocks[flag]["opcode"] in ["looks_costume"]:
         return {"COSTUME": sprite.blocks[flag]["fields"]["COSTUME"][0]}
+    if sprite.blocks[flag]["opcode"] in ["looks_backdrops"]:
+        return {"COSTUME": sprite.blocks[flag]["fields"]["BACKDROP"][0]}
+    
     for i, j in input1.items():
         if isinstance(j[1], list):
             result[i] = j[1][1]
@@ -103,8 +106,11 @@ class Sprite(pygame.sprite.Sprite):
 
     def draw(self) -> None:
         costume = self.costumes[self.currentCostume]
-
-        image = pygame.image.load(costume["md5ext"])
+        
+        try:
+            image = pygame.image.load(costume["md5ext"])
+        except:
+            image = pygame.image.load(costume["assetId"]+"."+costume["dataFormat"])    
         if "svg" != costume["dataFormat"]:
             image = pygame.transform.rotozoom(
                 image, 0, 0.5
@@ -268,7 +274,7 @@ class Sprite(pygame.sprite.Sprite):
             else:
                 self.x = 480 - self.x"""
 
-        logging.debug((self.y>0,( (90<(self.direction%360)<270)))) 
+        #logging.debug((self.y>0,( (90<(self.direction%360)<270)))) 
         if not (0 <= self.rect.top <= self.rect.bottom <= 360):
             if bool(self.y>0)+(90<(self.direction%360)<270)==1:#没好
                 #self.direction = -self.direction
@@ -326,10 +332,10 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         # self.currentcostome=
         count=0
-        for costome in self.costumes:
+        for costume in self.costumes:
             #logging.debug(costome["name"])
             #logging.debug(dic["COSTUME"])
-            if costome["name"]==dic["COSTUME"]:
+            if costume["name"]==dic["COSTUME"]:
                 self.currentCostume=count                
                 break
             count+=1
@@ -353,7 +359,26 @@ class Sprite(pygame.sprite.Sprite):
     def looks_setsizeto(self,flag):
         dic=S_eval(self,flag)
         #logging.debug(dic)       
-        self.size=float(dic["SIZE"])     
+        self.size=float(dic["SIZE"]) 
+    def looks_switchbackdropto(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic) 
+        #stage.currentCostume=dic["BACKDROP"]
+        count=0
+        for costume in stage.costumes:
+            if costume["name"]==dic["BACKDROP"]:
+                stage.currentCostume=count                
+                break
+            count+=1
+    def looks_backdrops(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        return dic["COSTUME"]
+    def looks_nextbackdrop(self,flag):
+        costumecount=len(stage.costumes)
+        stage.currentCostume+=1
+        if stage.currentCostume==costumecount:
+            stage.currentCostume=0    
 
 
 
@@ -389,7 +414,7 @@ def runcode(sprite: Sprite, flag: str)  :
 
 def main():
     
-    global screen, done, clock,fountage
+    global screen, done, clock,fountage,stage
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
@@ -410,6 +435,8 @@ def main():
         i: dict
         sprite = Sprite(i)
         sprite_list.append(sprite)
+        if sprite.isStage:
+            stage=sprite
         for flag, code in sprite.blocks.items():
             if code["opcode"] == "event_whenflagclicked":
                 # print(flag)
