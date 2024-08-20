@@ -396,7 +396,53 @@ class Sprite(pygame.sprite.Sprite):
             return safe_str(stage.currentCostume+1)  
         elif dic["TYPE"]=="name":
             return safe_str(stage.costumes[stage.currentCostume]["name"])
-
+    def operator_random(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        _from=dic["FROM"] 
+        to=dic["TO"]
+        if "." in _from+to:#浮点数
+            _from=safe_float(_from);to=safe_float(to)
+            _from,to=sorted((_from,to))
+            return random.uniform(_from,to)
+        else:
+            _from=safe_int(_from);to=safe_int(to)
+            _from,to=sorted((_from,to))
+            return random.randint(_from,to)
+          
+    def operator_gt(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)    
+        if IsNum(dic["OPERAND1"]) and IsNum(dic["OPERAND2"]):
+            operand1=safe_float(dic["OPERAND1"])
+            operand2=safe_float(dic["OPERAND2"])
+        
+            logging.debug((operand1,operand2))
+            return safe_str(operand1>operand2)
+        else:
+            return safe_str(dic["OPERAND1"]>dic["OPERAND2"])        
+    def operator_lt(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)    
+        if IsNum(dic["OPERAND1"]) and IsNum(dic["OPERAND2"]):
+            operand1=safe_float(dic["OPERAND1"])
+            operand2=safe_float(dic["OPERAND2"])
+        
+            logging.debug((operand1,operand2))
+            return safe_str(operand1<operand2)
+        else:
+            return safe_str(dic["OPERAND1"]<dic["OPERAND2"])
+    def operator_equals(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)    
+        if IsNum(dic["OPERAND1"]) and IsNum(dic["OPERAND2"]):
+            operand1=safe_float(dic["OPERAND1"])
+            operand2=safe_float(dic["OPERAND2"])
+        
+            logging.debug((operand1,operand2))
+            return safe_str(math.isclose(operand1,operand2))
+        else:
+            return safe_str(dic["OPERAND1"]==dic["OPERAND2"])    
 
 
 
