@@ -80,7 +80,8 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"COSTUME": sprite.blocks[flag]["fields"]["COSTUME"][0]}
     if sprite.blocks[flag]["opcode"] in ["looks_backdrops"]:
         return {"COSTUME": sprite.blocks[flag]["fields"]["BACKDROP"][0]}
-    
+    if sprite.blocks[flag]["opcode"] in ["looks_costumenumbername","looks_backdropnumbername"]:
+        return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
     for i, j in input1.items():
         if isinstance(j[1], list):
             result[i] = j[1][1]
@@ -379,6 +380,22 @@ class Sprite(pygame.sprite.Sprite):
         stage.currentCostume+=1
         if stage.currentCostume==costumecount:
             stage.currentCostume=0    
+    def looks_costumenumbername(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        if dic["TYPE"]=="number":
+            return safe_str(self.currentCostume+1)  
+        elif dic["TYPE"]=="name":
+            return safe_str(self.costumes[self.currentCostume]["name"])  
+    def looks_size(self,flag) -> str:
+        return safe_str(self.size)
+    def looks_backdropnumbername(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        if dic["TYPE"]=="number":
+            return safe_str(stage.currentCostume+1)  
+        elif dic["TYPE"]=="name":
+            return safe_str(stage.costumes[stage.currentCostume]["name"])
 
 
 
