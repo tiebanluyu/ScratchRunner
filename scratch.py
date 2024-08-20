@@ -443,7 +443,15 @@ class Sprite(pygame.sprite.Sprite):
             return safe_str(math.isclose(operand1,operand2))
         else:
             return safe_str(dic["OPERAND1"]==dic["OPERAND2"])    
-
+    def operator_and(self,flag) -> str:
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        return safe_str(safe_bool(dic["OPERAND1"]) and safe_bool(dic["OPERAND2"]))
+    def operator_or(self,flag) -> str:
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        return safe_str(safe_bool(dic["OPERAND1"]) or safe_bool(dic["OPERAND2"]))
+        
 
 
 

@@ -17,6 +17,10 @@ def safe_str(object) -> str:
     except:
         return ""   
 def safe_bool(object) -> bool:
+    if object in ["None","False"]:
+        return False
+    if object =="True":
+        return True
     if type(object)==bool:
         return object
     try:
