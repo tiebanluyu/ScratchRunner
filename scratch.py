@@ -112,10 +112,15 @@ class Sprite(pygame.sprite.Sprite):
         if self.isStage:
             screen.blit(image, (0, 0))
             return
-
+        if not self.visible:
+            return
+        
+        image = pygame.transform.rotozoom(
+                image, 0, self.size/100
+            )
         direction = self.direction % 360  # 不是stage才有direction
         x, y = positionmap1(self.x, self.y)
-        rotatecentre = costume["rotationCenterX"], costume["rotationCenterY"]
+        rotatecentre = costume["rotationCenterX"]*(self.size/100), costume["rotationCenterY"]*(self.size/100)
         self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
@@ -332,6 +337,23 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         #logging.debug(dic)
         return dic["COSTUME"]
+    def looks_show(self,flag):
+        self.visible=True
+    def looks_hide(self,flag):
+        self.visible=False    
+    def looks_nextcostume(self,flag):
+        costumecount=len(self.costumes)
+        self.currentCostume+=1
+        if self.currentCostume==costumecount:
+            self.currentCostume=0    
+    def looks_changesizeby(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic)
+        self.size+=float(dic["CHANGE"]) 
+    def looks_setsizeto(self,flag):
+        dic=S_eval(self,flag)
+        #logging.debug(dic)       
+        self.size=float(dic["SIZE"])     
 
 
 
