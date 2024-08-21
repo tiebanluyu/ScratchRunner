@@ -91,7 +91,10 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
             else:
                 result[i]=getvaluable(sprite,j[1][2])    
         else:
-            result[i] =  j[1]
+            if sprite.blocks[flag]["opcode"].startswith("operator_"):
+                result[i] =  runcode(sprite,j[1])
+            else:    
+                result[i] =  j[1]
     # logging.debug(result)#这行随时要用
 
     return result
@@ -207,7 +210,14 @@ class Sprite(pygame.sprite.Sprite):
         if runcode(self,dic["CONDITION"])=="True":
             runcode(self, dic["SUBSTACK"])
         else:
-            runcode(self, dic["SUBSTACK2"])    
+            runcode(self, dic["SUBSTACK2"])   
+    def control_wait_until(self,flag):
+        dic=S_eval(self,flag)
+        condition=dic["CONDITION"]
+        logging.debug(condition)
+        while 1:
+            if runcode(self,condition)=="True":
+                break         
     def control_repeat(self, flag) -> None:
         dic = S_eval(self, flag)
         for _ in range(safe_int(dic["TIMES"])):
