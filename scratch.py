@@ -7,7 +7,7 @@ import logging
 import random
 import zipfile
 import os
-from drawtext import drawtext
+from drawtext import *
 
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -524,11 +524,12 @@ class Moniter:
     def draw(self):
         #logging.debug(self.__dict__)
         if self.opcode=="data_variable":
-            variablename=""
+            variablename=self.id
             sprite=stage#全局变量默认从stage中找
+            """
             for i in variables_name.items():
                 if i[1]==self.params["VARIABLE"]:
-                    variablename=i[0]
+                    variablename=i[0]"""
 
             for i in sprite_list:
                 #logging.debug((str(i),self.spriteName))
@@ -537,6 +538,7 @@ class Moniter:
             value=getvaluable(sprite,variablename)
             logging.debug(self.params["VARIABLE"])
             logging.debug(value)
+            drawvariable(self,value,screen)
 
 
          
@@ -636,11 +638,13 @@ def main():
                 i.draw() 
             except:
                 done=True 
+                raise Exception
         for i in moniter_list:
             try:
                 i.draw() 
             except:
-                done=True       
+                done=True 
+                raise Exception      
 
         # 更新窗口
         pygame.display.update()
