@@ -515,7 +515,31 @@ class Sprite(pygame.sprite.Sprite):
         
 
 
+class Moniter:
+    def __init__(self,dict1):
+        for name, value in dict1.items():
+            #logging.debug((name, value))
+            setattr(self, name, value)
+        #logging.debug(self.mode)
+    def draw(self):
+        #logging.debug(self.__dict__)
+        if self.opcode=="data_variable":
+            variablename=""
+            sprite=stage#全局变量默认从stage中找
+            for i in variables_name.items():
+                if i[1]==self.params["VARIABLE"]:
+                    variablename=i[0]
 
+            for i in sprite_list:
+                #logging.debug((str(i),self.spriteName))
+                if str(i)==self.spriteName:
+                    sprite=i        
+            value=getvaluable(sprite,variablename)
+            logging.debug(self.params["VARIABLE"])
+            logging.debug(value)
+
+
+         
 
 def runcode(sprite: Sprite, flag: str)  :
     
@@ -546,7 +570,7 @@ def runcode(sprite: Sprite, flag: str)  :
 
 def main():
     
-    global screen, done, clock,fountage,stage
+    global screen, done, clock,fountage,stage,variables_name,sprite_list
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
@@ -568,12 +592,15 @@ def main():
         sprite = Sprite(i)
         sprite_list.append(sprite)
         sprite.variables={}
+        variables_name={}
         #logging.debug(sprite.variables)
         for j in i["variables"].items():
             #logging.debug(j)
             sprite.variables[j[0]]=safe_str(j[1][1])
+            variables_name[j[0]]=safe_str(j[1][0])
         logging.info(f"提取{sprite}的变量"  )  
-        logging.info(sprite.variables)    
+        logging.info(sprite.variables)
+        logging.info(variables_name)    
         if sprite.isStage:
             stage=sprite
         for flag, code in sprite.blocks.items():
@@ -585,6 +612,10 @@ def main():
                 )
                 thread.start()
                 # runcode(sprite,flag)
+    moniter_list=[]            
+    for i in t["monitors"]:
+        moniter=Moniter(i)
+        moniter_list.append(moniter)
 
     # 设置窗口标题
     pygame.display.set_caption("scratch")
@@ -601,8 +632,15 @@ def main():
 
         # 逐个角色更新窗口
         for i in sprite_list:
-            #i.update()
-            i.draw()
+            try:
+                i.draw() 
+            except:
+                done=True 
+        for i in moniter_list:
+            try:
+                i.draw() 
+            except:
+                done=True       
 
         # 更新窗口
         pygame.display.update()
