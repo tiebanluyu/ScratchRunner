@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.WARNING, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -91,7 +91,7 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
             else:
                 result[i]=getvaluable(sprite,j[1][2])    
         else:
-            result[i] = runcode(sprite, j[1])
+            result[i] =  j[1]
     # logging.debug(result)#这行随时要用
 
     return result
@@ -197,9 +197,17 @@ class Sprite(pygame.sprite.Sprite):
         runcode(self, self.blocks[flag]["next"])
 
     def control_if(self, flag: str) -> None:
-        if S_eval(self, flag):
-            runcode(self, flag)
-
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        if runcode(self,dic["CONDITION"])=="True":
+            runcode(self,dic["SUBSTACK"])
+    def control_if_else(self, flag: str) -> None:
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        if runcode(self,dic["CONDITION"])=="True":
+            runcode(self, dic["SUBSTACK"])
+        else:
+            runcode(self, dic["SUBSTACK2"])    
     def control_repeat(self, flag) -> None:
         dic = S_eval(self, flag)
         for _ in range(safe_int(dic["TIMES"])):
@@ -258,7 +266,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def motion_pointtowards(self, flag:str) -> None:
         dic = S_eval(self, flag)
-        self.direction = dic["TOWARDS"]
+        self.direction = safe_float(runcode(self,dic["TOWARDS"]))
 
     def motion_pointtowards_menu(self, flag:str):
         dic = S_eval(self, flag)
@@ -533,8 +541,8 @@ class Moniter:
         if self.opcode=="data_variable":
                     
             value=getvaluable(sprite,variablename)
-            logging.debug(self.params["VARIABLE"])
-            logging.debug(value)
+            #logging.debug(self.params["VARIABLE"])
+            #logging.debug(value)
             text=" "+self.params["VARIABLE"]+":"+value+" "
             if sprite!=stage:
                 text=" "+str(sprite)+text
