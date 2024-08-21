@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.WARNING, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -275,7 +275,7 @@ class Sprite(pygame.sprite.Sprite):
             direction = random.uniform(0, 360)
             return direction
 
-    def motion_ifonedgebounce(self, flag:str):
+    def motion_ifonedgebounce(self, flag:str=None):
         # 其实遇到边缘就反弹没有任何参数   
         #logging.debug((self.x>0,((self.direction%360)>180)))    
         if not (0 <=self.rect.left <= self.rect.right <= 480):
@@ -300,12 +300,12 @@ class Sprite(pygame.sprite.Sprite):
                 #logging.debug("碰撞")
                 self.direction = 180 - self.direction
             #logging.debug("碰撞")
-    def motion_xposition(self,flag) ->str:
-        return safe_str(self.x)
-    def motion_yposition(self,flag) ->str:
-        return safe_str(self.y)
-    def motion_direction(self,flag) ->str:
-        return safe_str(self.direction)            
+    def motion_xposition(self,flag=None) ->str:#取前9位，否则变量显示太难看
+        return safe_str(self.x)[0:9]
+    def motion_yposition(self,flag=None) ->str:
+        return safe_str(self.y)[0:9]
+    def motion_direction(self,flag=None) ->str:
+        return safe_str(self.direction)[0:9]            
     def operator_add(self,flag) -> str:
         #logging.debug("hello")
         dic=S_eval(self,flag)
@@ -358,11 +358,11 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         #logging.debug(dic)
         return dic["COSTUME"]
-    def looks_show(self,flag):
+    def looks_show(self,flag=None):
         self.visible=True
     def looks_hide(self,flag):
         self.visible=False    
-    def looks_nextcostume(self,flag):
+    def looks_nextcostume(self,flag=None):
         costumecount=len(self.costumes)
         self.currentCostume+=1
         if self.currentCostume==costumecount:
@@ -389,7 +389,7 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         #logging.debug(dic)
         return dic["COSTUME"]
-    def looks_nextbackdrop(self,flag):
+    def looks_nextbackdrop(self,flag=None):
         costumecount=len(stage.costumes)
         stage.currentCostume+=1
         if stage.currentCostume==costumecount:
@@ -401,7 +401,7 @@ class Sprite(pygame.sprite.Sprite):
             return safe_str(self.currentCostume+1)  
         elif dic["TYPE"]=="name":
             return safe_str(self.costumes[self.currentCostume]["name"])  
-    def looks_size(self,flag) -> str:
+    def looks_size(self,flag=None) -> str:
         return safe_str(self.size)
     def looks_backdropnumbername(self,flag):
         dic=S_eval(self,flag)
@@ -523,23 +523,26 @@ class Moniter:
         #logging.debug(self.mode)
     def draw(self):
         #logging.debug(self.__dict__)
+        if not self.visible:
+            return
+        variablename=self.id
+        sprite=stage#全局变量默认从stage中找
+        for i in sprite_list:               
+            if str(i)==self.spriteName:
+                sprite=i
         if self.opcode=="data_variable":
-            variablename=self.id
-            sprite=stage#全局变量默认从stage中找
-            """
-            for i in variables_name.items():
-                if i[1]==self.params["VARIABLE"]:
-                    variablename=i[0]"""
-
-            for i in sprite_list:
-                #logging.debug((str(i),self.spriteName))
-                if str(i)==self.spriteName:
-                    sprite=i        
+                    
             value=getvaluable(sprite,variablename)
             logging.debug(self.params["VARIABLE"])
             logging.debug(value)
-            drawvariable(self,value,screen)
-
+            text=" "+self.params["VARIABLE"]+":"+value+" "
+            if sprite!=stage:
+                text=" "+str(sprite)+text
+            drawvariable(self,text,screen)
+        else:
+            value=getattr(sprite,self.opcode)()
+            front=" "+str(sprite)+":"+self.opcode.replace("motion_","")
+            drawvariable(self,front+value,screen)
 
          
 
