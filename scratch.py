@@ -530,6 +530,10 @@ class Sprite(pygame.sprite.Sprite):
                     safe_str(safe_float(value)+safe_float(getvaluable(self,variable)))
                     )
         logging.debug(self.variables)
+    def control_stop(self,flag):
+        global done
+        #logging.error("结束了")
+        done=True
         
 
 
@@ -673,6 +677,7 @@ def main():
 
     # 退出Pygame
     logging.info("退出程序")
+    sleep(3)
     for filename in filenamelist:
         if logging.getLogger().level<=10:
             break
