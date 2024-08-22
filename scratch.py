@@ -20,6 +20,7 @@ FPS:int = 50
 TPS:int = 50
 # 设置窗口大小
 STAGE_SIZE = (480, 360)
+STAGE_SHOW_SIZE=(960, 720)
 POSITION = (0, 0)
 
 
@@ -602,7 +603,9 @@ def main():
     # 初始化Pygame
     pygame.init()
     
-    screen = pygame.display.set_mode(STAGE_SIZE)
+    show_screen = pygame.display.set_mode(STAGE_SHOW_SIZE)
+    screen=pygame.Surface(STAGE_SIZE)
+    
     with zipfile.ZipFile("作品.sb3") as f:
         filenamelist=f.namelist()
         #logging.debug(f.namelist())
@@ -645,8 +648,7 @@ def main():
         moniter_list.append(moniter)
 
     # 设置窗口标题
-    pygame.display.set_caption("scratch")
-
+    pygame.display.set_caption("scratch")    
     # 渲染线程主循环
     while not done:
         # 处理事件
@@ -658,12 +660,14 @@ def main():
         screen.fill((255, 255, 255))
 
         # 逐个角色更新窗口
+        
         for i in sprite_list:
             try:
                 i.draw() 
             except:
                 done=True 
                 raise Exception
+              
         for i in moniter_list:
             try:
                 i.draw() 
@@ -672,12 +676,22 @@ def main():
                 raise Exception      
 
         # 更新窗口
+        
+        scaled_screen=pygame.transform.scale(screen,(960,720))
+        
+        show_screen.blit(scaled_screen,(0,0))
+        
+
         pygame.display.update()
+        
         clock.tick(FPS)
+        
+
+        
 
     # 退出Pygame
     logging.info("退出程序")
-    sleep(1)
+    sleep(0.25)
     for filename in filenamelist:
         if logging.getLogger().level<=10:
             break
