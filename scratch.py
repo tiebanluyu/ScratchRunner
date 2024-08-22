@@ -677,7 +677,7 @@ def main():
 
     # 退出Pygame
     logging.info("退出程序")
-    sleep(3)
+    sleep(1)
     for filename in filenamelist:
         if logging.getLogger().level<=10:
             break

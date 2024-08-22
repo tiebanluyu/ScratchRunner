@@ -1,9 +1,14 @@
 import pygame,logging
+pygame.font.init()
+try:
+    font = pygame.font.SysFont("simhei",20)
+except:#不排除其他国家没有宋体        
+    font = pygame.font.SysFont(None,16)
 def drawtext(sprite,surface):
     if sprite.words=="":
         return
     rect=sprite.rect
-    font = pygame.font.Font("MSYH.TTC", 16)
+    
     text=sprite.words
     fontColor = (0, 0, 0)
     textsurface=font.render(text,True, fontColor)
@@ -12,7 +17,7 @@ def drawtext(sprite,surface):
     pygame.draw.rect(surface, (0, 0, 0), (rect.topright[0]-5,rect.topright[1]-5, textsurface.get_size()[0]+10,textsurface.get_size()[1]+10),2)
     surface.blit(textsurface,rect.topright)
 def drawvariable(moniter,text,surface):
-    font = pygame.font.Font("MSYH.TTC", 14)
+    #font =pygame.font.Font("HarmonyOS_Sans_SC_Regular.ttf",24)
     fontColor = (255, 255, 255)
     textsurface=font.render(text,True, fontColor)
     position=(moniter.x,moniter.y)
