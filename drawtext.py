@@ -18,6 +18,8 @@ def drawtext(sprite,surface):
     surface.blit(textsurface,rect.topright)
 def drawvariable(moniter,text,surface):
     #font =pygame.font.Font("HarmonyOS_Sans_SC_Regular.ttf",24)
+    if not moniter.visible:
+        return
     fontColor = (255, 255, 255)
     textsurface=font.render(text,True, fontColor)
     position=(moniter.x,moniter.y)
@@ -25,5 +27,50 @@ def drawvariable(moniter,text,surface):
     surface.blit(textsurface,position)
     
     #logging.debug("drawvariable")
+def drawlist(moniter,thelist,screen):
+    slice_lict=[]
+    fontColor = (0, 0, 0)
+    for i in thelist:
+        if len(i)>10:
+            i=i[:10]+"..."
+        slice_lict.append(i)
+    y=moniter.show_y
+    x=5
+    backgroundsurface=pygame.surface.Surface((moniter.width,moniter.height))
+    backgroundrect=pygame.draw.rect(screen, (255, 140, 26), (moniter.x,moniter.y, *backgroundsurface.get_size()),0)
+    backgroundsurface.fill((100,100,100))    
+    for text in thelist: 
         
+        #y+=textsurface.get_size()[1]+5
+          
+        textsurface=font.render(text,True, fontColor)
+        
+        if y>=0:
+            rect=pygame.draw.rect(backgroundsurface, (255, 140, 26), (x,y, *textsurface.get_size()),0)
+            backgroundsurface.blit(textsurface,rect)
+        y+=textsurface.get_size()[1]+5
+        if y>moniter.y+moniter.height:
+            break
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    mouse_x/=2
+    mouse_y/=2
+    is_mouse_over = backgroundrect.collidepoint(mouse_x, mouse_y)
+    is_mouse_down = pygame.mouse.get_pressed()[0]
+    #logging.debug(pygame.mouse.get_pressed())
+    # 判断鼠标是否悬停在图像上
+    if is_mouse_over and is_mouse_down:
+        # 鼠标悬停在图像上
+
+        moniter.show_y=moniter.show_y-1
+        logging.debug("show_y:"+str(moniter.show_y))
+    else:
+        pass
+        # 鼠标不在图像上
+        #print("Mouse is not over the image")
+    
+
+    screen.blit(backgroundsurface,backgroundrect)    
+
+    
+    
     

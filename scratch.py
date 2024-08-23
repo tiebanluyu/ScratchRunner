@@ -112,7 +112,7 @@ def setvaluable(sprite,id,obj) -> None:
     if id in sprite.variables:
         stage.variables[id]=safe_str(obj)
 def getlist(sprite,id):
-    logging.debug((sprite,id,stage.lists,sprite.lists))
+    #logging.debug((sprite,id,stage.lists,sprite.lists))
     if id in stage.lists:
         return stage.lists[id]
     if id in sprite.lists:
@@ -546,10 +546,10 @@ class Sprite(pygame.sprite.Sprite):
         done=True
     def data_addtolist(self,flag):
         dic=S_eval(self,flag)
-        logging.debug(dic)
+        #logging.debug(dic)
         thelist=getlist(self,dic["LIST"])
         thelist.append(safe_str(dic["ITEM"]))
-        logging.debug(thelist)    
+        #logging.debug(thelist)    
         
 
 
@@ -558,6 +558,8 @@ class Moniter:
         for name, value in dict1.items():
             #logging.debug((name, value))
             setattr(self, name, value)
+        if self.mode=="list":
+            self.show_y=0    
         #logging.debug(self.mode)
     def draw(self):
         #logging.debug(self.__dict__)
@@ -577,6 +579,9 @@ class Moniter:
             if sprite!=stage:
                 text=" "+str(sprite)+text
             drawvariable(self,text,screen)
+        elif self.opcode=="data_listcontents":
+            thelist=getlist(sprite,self.id)
+            drawlist(self,thelist,screen)    
         else:
             value=getattr(sprite,self.opcode)()
             front=" "+str(sprite)+":"+self.opcode.replace("motion_","")
@@ -613,7 +618,7 @@ def runcode(sprite: Sprite, flag: str)  :
 
 def main():
     
-    global screen, done, clock,fountage,stage,variables_name,sprite_list
+    global screen, done, clock,fountage,stage,variables_name,sprite_list,event_list,moniter_list,variables_name
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
