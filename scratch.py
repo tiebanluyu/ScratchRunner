@@ -84,7 +84,9 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
     if sprite.blocks[flag]["opcode"] in ["looks_costumenumbername","looks_backdropnumbername"]:
         return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
     if sprite.blocks[flag]["opcode"] in ["data_setvariableto","data_changevariableby"]:
-        result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]}    
+        result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]} 
+    if sprite.blocks[flag]["opcode"] in ["data_addtolist"]:
+        result={"LIST":sprite.blocks[flag]["fields"]["LIST"][1]}
     for i, j in input1.items():
         if isinstance(j[1], list):
             if len(j[1])==2:
@@ -99,16 +101,23 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
     # logging.debug(result)#这行随时要用
 
     return result
-def getvaluable(sprite,id):
+def getvaluable(sprite,id) -> str:
     if id in stage.variables:
         return safe_str(stage.variables[id])
     if id in sprite.variables:
         return safe_str(sprite.variables[id])
-def setvaluable(sprite,id,obj):
+def setvaluable(sprite,id,obj) -> None:
     if id in stage.variables:
         stage.variables[id]= safe_str(obj)
     if id in sprite.variables:
         stage.variables[id]=safe_str(obj)
+def getlist(sprite,id):
+    logging.debug((sprite,id,stage.lists,sprite.lists))
+    if id in stage.lists:
+        return stage.lists[id]
+    if id in sprite.lists:
+        return sprite.lists[id]
+
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, dict1: dict) -> None:
@@ -535,6 +544,12 @@ class Sprite(pygame.sprite.Sprite):
         global done
         #logging.error("结束了")
         done=True
+    def data_addtolist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist=getlist(self,dic["LIST"])
+        thelist.append(safe_str(dic["ITEM"]))
+        logging.debug(thelist)    
         
 
 
@@ -622,12 +637,17 @@ def main():
         sprite = Sprite(i)
         sprite_list.append(sprite)
         sprite.variables={}
+        sprite.lists={}
         variables_name={}
         #logging.debug(sprite.variables)
         for j in i["variables"].items():
             #logging.debug(j)
             sprite.variables[j[0]]=safe_str(j[1][1])
             variables_name[j[0]]=safe_str(j[1][0])
+        for j in i["lists"].items():
+            #logging.debug(j)
+            sprite.lists[j[0]]=(j[1][1])
+            #variables_name[j[0]]=safe_str(j[1][0])    
         logging.info(f"提取{sprite}的变量"  )  
         logging.info(sprite.variables)
         logging.info(variables_name)    
