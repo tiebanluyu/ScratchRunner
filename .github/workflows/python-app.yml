@@ -31,6 +31,7 @@ jobs:
         
     - name: package with pyinstaller
       run: |
-        python -m pyinstaller scratch.py
+        ls
+        pyinstaller scratch.py
         rm ./build ./scratch.spec 
         
