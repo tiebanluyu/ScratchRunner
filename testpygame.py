@@ -1,3 +1,7 @@
+"""
+这个文件是用来给回答等输入块做模版的
+实际项目没用上
+"""
 import pygame
 from pygame.locals import *
 
