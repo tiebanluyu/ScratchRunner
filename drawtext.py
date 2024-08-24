@@ -1,4 +1,5 @@
 import pygame,logging
+from mouse import get_mouse_speed
 pygame.font.init()
 try:
     font = pygame.font.SysFont("simhei",20)
@@ -38,7 +39,9 @@ def drawlist(moniter,thelist,screen):
     x=5
     backgroundsurface=pygame.surface.Surface((moniter.width,moniter.height))
     backgroundrect=pygame.draw.rect(screen, (255, 140, 26), (moniter.x,moniter.y, *backgroundsurface.get_size()),0)
-    backgroundsurface.fill((100,100,100))    
+    backgroundsurface.fill((230,240,255))
+    
+    #backgroundsurface.blit(textsurface,rect)    
     for text in thelist: 
         
         #y+=textsurface.get_size()[1]+5
@@ -48,9 +51,18 @@ def drawlist(moniter,thelist,screen):
         if y>=0:
             rect=pygame.draw.rect(backgroundsurface, (255, 140, 26), (x,y, *textsurface.get_size()),0)
             backgroundsurface.blit(textsurface,rect)
+            
         y+=textsurface.get_size()[1]+5
         if y>moniter.y+moniter.height:
             break
+    #绘制列表名称
+    textsurface=font.render(moniter.params["LIST"],True, fontColor)
+    rect=pygame.draw.rect(backgroundsurface, (255,255,255), (0,0, *textsurface.get_size()))
+
+    backgroundsurface.blit(textsurface,rect)
+    
+    rect=pygame.draw.rect(backgroundsurface, (0, 0, 0), (0,0, *backgroundsurface.get_size()),2)#在背景上画一个边框
+    #0，0在background的坐标系中，width，height为矩形的宽和高    
     mouse_x, mouse_y = pygame.mouse.get_pos()
     mouse_x/=2
     mouse_y/=2
@@ -61,7 +73,7 @@ def drawlist(moniter,thelist,screen):
     if is_mouse_over and is_mouse_down:
         # 鼠标悬停在图像上
 
-        moniter.show_y=moniter.show_y-1
+        moniter.show_y=moniter.show_y+get_mouse_speed()[1]/10
         logging.debug("show_y:"+str(moniter.show_y))
     else:
         pass

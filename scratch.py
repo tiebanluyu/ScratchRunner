@@ -85,7 +85,7 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
     if sprite.blocks[flag]["opcode"] in ["data_setvariableto","data_changevariableby"]:
         result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]} 
-    if sprite.blocks[flag]["opcode"] in ["data_addtolist"]:
+    if sprite.blocks[flag]["opcode"] in ["data_addtolist","data_deleteoflist"]:
         result={"LIST":sprite.blocks[flag]["fields"]["LIST"][1]}
     for i, j in input1.items():
         if isinstance(j[1], list):
@@ -94,11 +94,13 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
             else:
                 result[i]=getvaluable(sprite,j[1][2])    
         else:
-            if sprite.blocks[flag]["opcode"].startswith("operator_"):
-                result[i] =  runcode(sprite,j[1])
+            for k in ["operator_","data_"]:
+                if sprite.blocks[flag]["opcode"].startswith(k):
+                    result[i] =  runcode(sprite,j[1])
+                    break
             else:    
                 result[i] =  j[1]
-    # logging.debug(result)#这行随时要用
+    logging.debug(result)#这行随时要用
 
     return result
 def getvaluable(sprite,id) -> str:
@@ -549,7 +551,12 @@ class Sprite(pygame.sprite.Sprite):
         #logging.debug(dic)
         thelist=getlist(self,dic["LIST"])
         thelist.append(safe_str(dic["ITEM"]))
-        #logging.debug(thelist)    
+        #logging.debug(thelist)   
+    def data_deleteoflist(self,flag):
+        dic=S_eval(self,flag)   
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        thelist.pop(safe_int(dic["INDEX"])-1)
         
 
 
@@ -558,6 +565,7 @@ class Moniter:
         for name, value in dict1.items():
             #logging.debug((name, value))
             setattr(self, name, value)
+            
         if self.mode=="list":
             self.show_y=0    
         #logging.debug(self.mode)
@@ -651,7 +659,9 @@ def main():
             variables_name[j[0]]=safe_str(j[1][0])
         for j in i["lists"].items():
             #logging.debug(j)
-            sprite.lists[j[0]]=(j[1][1])
+            thelist=j[1][1]
+            thelist=[safe_str(k) for k in thelist]
+            sprite.lists[j[0]]=thelist
             #variables_name[j[0]]=safe_str(j[1][0])    
         logging.info(f"提取{sprite}的变量"  )  
         logging.info(sprite.variables)
