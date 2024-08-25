@@ -35,7 +35,7 @@ def drawlist(moniter,thelist,screen):
         if len(i)>10:
             i=i[:10]+"..."
         slice_lict.append(i)
-    y=moniter.show_y
+    y=moniter.show_y+30
     x=5
     backgroundsurface=pygame.surface.Surface((moniter.width,moniter.height))
     backgroundrect=pygame.draw.rect(screen, (255, 140, 26), (moniter.x,moniter.y, *backgroundsurface.get_size()),0)
@@ -53,7 +53,7 @@ def drawlist(moniter,thelist,screen):
             backgroundsurface.blit(textsurface,rect)
             
         y+=textsurface.get_size()[1]+5
-        if y>moniter.y+moniter.height:
+        if y>moniter.height:
             break
     #绘制列表名称
     textsurface=font.render(moniter.params["LIST"],True, fontColor)
@@ -74,6 +74,11 @@ def drawlist(moniter,thelist,screen):
         # 鼠标悬停在图像上
 
         moniter.show_y=moniter.show_y+get_mouse_speed()[1]/10
+
+        #上移有界
+        if moniter.show_y>0:
+            moniter.show_y=0
+        
         logging.debug("show_y:"+str(moniter.show_y))
     else:
         pass

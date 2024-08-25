@@ -85,7 +85,18 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
     if sprite.blocks[flag]["opcode"] in ["data_setvariableto","data_changevariableby"]:
         result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]} 
-    if sprite.blocks[flag]["opcode"] in ["data_addtolist","data_deleteoflist"]:
+    if sprite.blocks[flag]["opcode"] in ["data_addtolist",
+                                         "data_deleteoflist",
+                                         "data_deletealloflist",
+                                         "data_itemoflist",
+                                         "data_insertatlist",
+                                         "data_replaceitemoflist",
+                                         "data_itemnumoflist",
+                                         "data_lengthoflist",
+                                         "data_listcontainsitem",
+                                         "data_showlist",
+                                          "data_hidelist"
+                                         ]:
         result={"LIST":sprite.blocks[flag]["fields"]["LIST"][1]}
     for i, j in input1.items():
         if isinstance(j[1], list):
@@ -94,7 +105,7 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
             else:
                 result[i]=getvaluable(sprite,j[1][2])    
         else:
-            for k in ["operator_","data_"]:
+            for k in ["operator_","data_","looks_"]:
                 if sprite.blocks[flag]["opcode"].startswith(k):
                     result[i] =  runcode(sprite,j[1])
                     break
@@ -530,7 +541,10 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         variable=dic["VARIABLE"]
         value=dic["VALUE"]
-        self.variables[variable]=safe_str(value)
+        #自己设置不可行，因为可能要动全局变量
+        #self.variables[variable]=safe_str(value)
+        setvaluable(self,variable,safe_str(value))
+        logging.debug(self.variables)
     def data_changevariableby(self,flag):
         dic=S_eval(self,flag)
         #logging.debug(dic)
@@ -557,6 +571,61 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         thelist:list[str]=getlist(self,dic["LIST"])
         thelist.pop(safe_int(dic["INDEX"])-1)
+
+    def data_deletealloflist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        #thelist.pop(safe_int(dic["INDEX"])-1)
+        thelist.clear()
+    def data_itemoflist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        return safe_str(thelist[safe_int(dic["INDEX"])-1])
+    def data_insertatlist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        thelist.insert(safe_int(dic["INDEX"])-1,safe_str(dic["ITEM"]))
+    def data_replaceitemoflist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        thelist[safe_int(dic["INDEX"])-1]=safe_str(dic["ITEM"])  
+    def data_itemnumoflist(self,flag):  
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"]) 
+        for i in thelist:
+            if i==safe_str(dic["ITEM"]):
+                return safe_str(thelist.index(i)+1)
+        return safe_str(0)
+    def data_lengthoflist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        return safe_str(len(thelist))
+    def data_listcontainsitem(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        thelist:list[str]=getlist(self,dic["LIST"])
+        return safe_str(safe_str(dic["ITEM"]) in thelist)
+    def data_showlist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        #thelist:list[str]=getlist(self,dic["LIST"])
+        for i in moniter_list:
+            if i.id==dic["LIST"]:
+                i.visible=True
+    def data_hidelist(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        #thelist:list[str]=getlist(self,dic["LIST"])
+        for i in moniter_list:
+            if i.id==dic["LIST"]:
+                i.visible=False
+            
         
 
 
@@ -634,7 +703,7 @@ def main():
     show_screen = pygame.display.set_mode(STAGE_SHOW_SIZE)
     screen=pygame.Surface(STAGE_SIZE)
     
-    with zipfile.ZipFile("作品.sb3") as f:
+    with zipfile.ZipFile("project.sb3") as f:
         filenamelist=f.namelist()
         #logging.debug(f.namelist())
         f.extractall()
