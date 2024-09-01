@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.ERROR, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -98,18 +98,27 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
                                           "data_hidelist"
                                          ]:
         result={"LIST":sprite.blocks[flag]["fields"]["LIST"][1]}
+    if sprite.blocks[flag]["opcode"]=="control_create_clone_of_menu":
+        #logging.debug(sprite.blocks[flag]["fields"]["CLONE_OPTION"][0])
+        return {"CLONE_OPTION":sprite.blocks[flag]["fields"]["CLONE_OPTION"][0]}    
+    opcode=sprite.blocks[flag]["opcode"]
+    if opcode=="control_create_clone_of":
+        result["CLONE_OPTION"] = runcode(sprite,sprite.blocks[flag]["inputs"]["CLONE_OPTION"][1])
+        return result
+    
     for i, j in input1.items():
-        if isinstance(j[1], list):
-            if len(j[1])==2:
+        if isinstance(j[1], list):#有可能是字面值
+            if len(j[1])==2:#字面值对应列表长度为二
                 result[i] = j[1][1]
-            else:
+            else:#变量对应列表长度为三
                 result[i]=getvaluable(sprite,j[1][2])    
         else:
-            for k in ["operator_","data_","looks_"]:
-                if sprite.blocks[flag]["opcode"].startswith(k):
-                    result[i] =  runcode(sprite,j[1])
+            
+            for k in ["operator_","data_","looks_"]:#以这些开头的要求值
+                if opcode.startswith(k):
+                    result[i] = runcode(sprite,j[1])
                     break
-            else:    
+            else:#countrol类的一些积木，不要求值，则直接取值    
                 result[i] =  j[1]
     logging.debug(result)#这行随时要用
 
@@ -625,6 +634,32 @@ class Sprite(pygame.sprite.Sprite):
         for i in moniter_list:
             if i.id==dic["LIST"]:
                 i.visible=False
+    def control_create_clone_of(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        import copy
+        newsprite=self.copy()
+        clone_list.append(newsprite)
+        thread_list=[]
+        for flag, code in newsprite.blocks.items():
+            if code["opcode"] == "control_start_as_clone":
+
+                thread = threading.Thread(
+                    name=str(newsprite) + flag+" clone", target=runcode, args=(newsprite, flag)
+                )
+                thread_list.append(thread)
+                thread.start()
+    def control_create_clone_of_menu(self,flag)-> dict:        
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return dic["CLONE_OPTION"]
+    def copy(self):
+        import copy
+        return self.__class__(copy.copy(self.__dict__))
+    def control_start_as_clone(self,flag):
+        
+        runcode(self,self.blocks[flag]["next"])
+    
             
         
 
@@ -696,6 +731,7 @@ def runcode(sprite: Sprite, flag: str)  :
 def main():
     
     global screen, done, clock,fountage,stage,variables_name,sprite_list,event_list,moniter_list,variables_name
+    global clone_list
     # 主程序从这里开始
     # 初始化Pygame
     pygame.init()
@@ -710,6 +746,7 @@ def main():
 
     t = json.loads(open("project.json", "r", encoding="utf-8").read())
     sprite_list = []  # 角色们
+    clone_list=[]
 
     done = False  # done是用来标记程序是否运行，False代表运行，true代表结束
     clock = pygame.time.Clock()
@@ -765,12 +802,13 @@ def main():
 
         # 逐个角色更新窗口
         
-        for i in sprite_list:
+        for i in sprite_list+clone_list:
             try:
                 i.draw() 
             except:
                 done=True 
                 raise Exception
+            
               
         for i in moniter_list:
             try:
