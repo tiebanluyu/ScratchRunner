@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.ERROR, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -253,12 +253,16 @@ class Sprite(pygame.sprite.Sprite):
     def control_repeat(self, flag) -> None:
         dic = S_eval(self, flag)
         for _ in range(safe_int(dic["TIMES"])):
+            if self.clone_mode==2:
+                break
             runcode(self, self.blocks[flag]["inputs"]["SUBSTACK"][1])
 
     def control_forever(self, flag: str) -> None:
 
         while 1:
             # self.x=1
+            if self.clone_mode==2:
+                break
             runcode(self, self.blocks[flag]["inputs"]["SUBSTACK"][1])
 
     def control_wait(self, flag: str) -> None:
@@ -639,6 +643,7 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         import copy
         newsprite=self.copy()
+        newsprite.clone_mode=1
         clone_list.append(newsprite)
         thread_list=[]
         for flag, code in newsprite.blocks.items():
@@ -659,6 +664,9 @@ class Sprite(pygame.sprite.Sprite):
     def control_start_as_clone(self,flag):
         
         runcode(self,self.blocks[flag]["next"])
+    def control_delete_this_clone(self,flag):
+        if self.clone_mode==1:
+            self.clone_mode=2    
     
             
         
@@ -723,7 +731,7 @@ def runcode(sprite: Sprite, flag: str)  :
     else:
         result=func(flag)    
     clock.tick(TPS)
-    if sprite.blocks[flag]["next"] != None:  # 如果还有接着的积木，执行下去
+    if sprite.blocks[flag]["next"] != None and sprite.clone_mode!=2:  # 如果还有接着的积木，执行下去
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
     return result
 
@@ -753,7 +761,12 @@ def main():
     
     for i in t["targets"]:
         i: dict
+        i["clone_mode"]=0
+        #clone_mode=0表示不是克隆
+        #clone_mode=1表示克隆
+        #clone_mode=2表示克隆体被删除
         sprite = Sprite(i)
+        
         sprite_list.append(sprite)
         sprite.variables={}
         sprite.lists={}
@@ -803,6 +816,8 @@ def main():
         # 逐个角色更新窗口
         
         for i in sprite_list+clone_list:
+            if i.clone_mode==2:#克隆体被删除
+                continue
             try:
                 i.draw() 
             except:
