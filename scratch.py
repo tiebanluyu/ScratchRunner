@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.ERROR, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -86,14 +86,14 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         else:
             result[key.upper()] = value[0]
     for key, value in input1.items():
-        logging.debug((key, value))
+        #logging.debug((key, value))
         if value[1][0].__class__==int:
             result[key.upper()] = value[1][1]
         else:
             result[key.upper()]=runcode(sprite,value[1])    
         
 
-    logging.debug(result) 
+    #logging.debug(result) 
     return result   
 def getvaluable(sprite,id) -> str:
     
@@ -714,124 +714,135 @@ def runcode(sprite: Sprite, flag: str)  :
     return result
 
 
-def main():
+
     
-    global screen, done, clock,fountage,stage,variables_name,sprite_list,event_list,moniter_list,variables_name
-    global clone_list
+
     # 主程序从这里开始
     # 初始化Pygame
-    pygame.init()
+pygame.init()
     
-    show_screen = pygame.display.set_mode(STAGE_SHOW_SIZE)
-    screen=pygame.Surface(STAGE_SIZE)
+show_screen = pygame.display.set_mode(STAGE_SHOW_SIZE)
+screen=pygame.Surface(STAGE_SIZE)
     
-    with zipfile.ZipFile("project.sb3") as f:
-        filenamelist=f.namelist()
-        #logging.debug(f.namelist())
-        f.extractall()
+with zipfile.ZipFile("project.sb3") as f:
+    filenamelist=f.namelist()
+    #logging.debug(f.namelist())
+    f.extractall()
 
-    t = json.loads(open("project.json", "r", encoding="utf-8").read())
-    sprite_list = []  # 角色们
-    clone_list=[]
+t = json.loads(open("project.json", "r", encoding="utf-8").read())
+sprite_list = []  # 角色们
+clone_list=[]
 
-    done = False  # done是用来标记程序是否运行，False代表运行，true代表结束
-    clock = pygame.time.Clock()
+done = False  # done是用来标记程序是否运行，False代表运行，true代表结束
+clock = pygame.time.Clock()
     
-    for i in t["targets"]:
-        i: dict
-        i["clone_mode"]=0
-        #clone_mode=0表示不是克隆
-        #clone_mode=1表示克隆
-        #clone_mode=2表示克隆体被删除
-        sprite = Sprite(i)
-        
-        sprite_list.append(sprite)
-        sprite.variables={}
-        sprite.lists={}
-        variables_name={}
-        #logging.debug(sprite.variables)
-        for j in i["variables"].items():
-            #logging.debug(j)
-            sprite.variables[j[0]]=safe_str(j[1][1])
-            variables_name[j[0]]=safe_str(j[1][0])
-        for j in i["lists"].items():
-            #logging.debug(j)
-            thelist=j[1][1]
-            thelist=[safe_str(k) for k in thelist]
-            sprite.lists[j[0]]=thelist
-            #variables_name[j[0]]=safe_str(j[1][0])    
-        logging.info(f"提取{sprite}的变量"  )  
-        logging.info(sprite.variables)
-        logging.info(variables_name)    
-        if sprite.isStage:
-            stage=sprite
-        for flag, code in sprite.blocks.items():
-            if code["opcode"] == "event_whenflagclicked":
-                # print(flag)
-                flag = code["next"]
-                thread = threading.Thread(
-                    name=str(sprite) + flag, target=runcode, args=(sprite, flag)
-                )
-                thread.start()
-                # runcode(sprite,flag)
-    moniter_list=[]            
-    for i in t["monitors"]:
-        moniter=Moniter(i)
-        moniter_list.append(moniter)
+for i in t["targets"]:
+    i: dict
+    i["clone_mode"]=0
+    #clone_mode=0表示不是克隆
+    #clone_mode=1表示克隆
+    #clone_mode=2表示克隆体被删除
+    sprite = Sprite(i)
+    
+    sprite_list.append(sprite)
+    sprite.variables={}
+    sprite.lists={}
+    variables_name={}
+    #logging.debug(sprite.variables)
+    for j in i["variables"].items():
+        #logging.debug(j)
+        sprite.variables[j[0]]=safe_str(j[1][1])
+        variables_name[j[0]]=safe_str(j[1][0])
+    for j in i["lists"].items():
+        #logging.debug(j)
+        thelist=j[1][1]
+        thelist=[safe_str(k) for k in thelist]
+        sprite.lists[j[0]]=thelist
+        #variables_name[j[0]]=safe_str(j[1][0])    
+    logging.info(f"提取{sprite}的变量"  )  
+    logging.info(sprite.variables)
+    logging.info(variables_name)    
+    if sprite.isStage:
+        stage=sprite
+    for flag, code in sprite.blocks.items():
+        if code["opcode"] == "event_whenflagclicked":
+            # print(flag)
+            flag = code["next"]
+            thread = threading.Thread(
+                name=str(sprite) + flag, target=runcode, args=(sprite, flag)
+            )
+            thread.start()
+            # runcode(sprite,flag)
+moniter_list=[]            
+for i in t["monitors"]:
+    moniter=Moniter(i)
+    moniter_list.append(moniter)
 
-    # 设置窗口标题
-    pygame.display.set_caption("scratch")    
-    # 渲染线程主循环
-    while not done:
-        # 处理事件
-        event = pygame.event.wait()
-        if event.type == pygame.QUIT:
-            done = True
+# 设置窗口标题
+pygame.display.set_caption("scratch")    
+# 渲染线程主循环
+while not done:
+    # 处理事件
+    event = pygame.event.poll()
+    #logging.debug(event)
+    if event.type != pygame.NOEVENT:
+        #print(event)
+        if event.type == pygame.KEYDOWN:
+            print(event.key)
+    if event.type == pygame.QUIT:
+        done = True
+    keys_pressed = pygame.key.get_pressed()  
+    logging.debug(keys_pressed)
+    if keys_pressed[pygame.K_RIGHT]:  
+        # 如果右键被按下  
+        print("Right key is pressed")    
+            
 
-        # 填充窗口颜色
-        screen.fill((255, 255, 255))
+  
 
-        # 逐个角色更新窗口
-        
-        for i in sprite_list+clone_list:
-            if i.clone_mode==2:#克隆体被删除
-                continue
-            try:
-                i.draw() 
-            except:
-                done=True 
-                raise Exception
+    # 填充窗口颜色
+    screen.fill((255, 255, 255))
+
+    # 逐个角色更新窗口
+    
+    for i in sprite_list+clone_list:
+        if i.clone_mode==2:#克隆体被删除
+            continue
+        try:
+            i.draw() 
+        except:
+            done=True 
+            raise Exception
             
               
-        for i in moniter_list:
-            try:
-                i.draw() 
-            except:
-                done=True 
-                raise Exception      
+    for i in moniter_list:
+        try:
+            i.draw() 
+        except:
+            done=True 
+            raise Exception      
 
         # 更新窗口
         
-        scaled_screen=pygame.transform.scale(screen,(960,720))
-        
-        show_screen.blit(scaled_screen,(0,0))
-        
+    scaled_screen=pygame.transform.scale(screen,(960,720))
+    
+    show_screen.blit(scaled_screen,(0,0))
+    
 
-        pygame.display.update()
+    pygame.display.update()
         
-        clock.tick(FPS)
-        
-
+    clock.tick(FPS)
         
 
-    # 退出Pygame
-    logging.info("退出程序")
-    sleep(0.25)
-    for filename in filenamelist:
-        if logging.getLogger().level<=10:
-            break
-        os.remove(filename)
+        
+
+# 退出Pygame
+logging.info("退出程序")
+sleep(0.25)
+for filename in filenamelist:
+    if logging.getLogger().level<=10:
+        break
+    os.remove(filename)
 
 
-if __name__ == "__main__":
-    main()
+
