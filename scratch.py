@@ -10,7 +10,7 @@ import os
 from drawtext import *
 
 logging.basicConfig(
-    level=logging.ERROR, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
 )
 
 from time import sleep
@@ -711,6 +711,7 @@ def runcode(sprite: Sprite, flag: str)  :
     clock.tick(TPS)
     if sprite.blocks[flag]["next"] != None and sprite.clone_mode!=2:  # 如果还有接着的积木，执行下去
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
+    #logging.debug(keys_pressed)    
     return result
 
 
@@ -791,11 +792,29 @@ while not done:
             print(event.key)
     if event.type == pygame.QUIT:
         done = True
-    keys_pressed = pygame.key.get_pressed()  
-    logging.debug(keys_pressed)
-    if keys_pressed[pygame.K_RIGHT]:  
-        # 如果右键被按下  
-        print("Right key is pressed")    
+    keys_pressed = pygame.key.get_pressed() 
+    if any(keys_pressed):
+        pass
+        #logging.debug(keys_pressed)
+        import keymap
+        for i in sprite_list+clone_list:
+            if i.clone_mode==2:#克隆体被删除
+                continue
+                    
+            for flag, code in i.blocks.items():
+                if code["opcode"] == "event_whenkeypressed":
+                    if keys_pressed[keymap.keymap[code["fields"]["KEY_OPTION"][0]]]:
+                        #logging.debug(code)
+                        flag = code["next"]
+                        thread = threading.Thread(
+                            name=str(i) + flag, target=runcode, args=(i, flag)
+                        )
+                        thread.start()
+                        # runcode(i,flag)
+
+        
+
+    
             
 
   
