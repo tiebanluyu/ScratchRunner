@@ -71,68 +71,45 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
 
     """
 
-    result = {}
-    input1: dict = sprite.blocks[flag]["inputs"]
-    if sprite.blocks[flag]["opcode"] in ["motion_goto_menu", "motion_glideto_menu"]:
-        return {"TO": sprite.blocks[flag]["fields"]["TO"][0]}
-    if sprite.blocks[flag]["opcode"] in ["motion_pointtowards_menu"]:
-        return {"TOWARDS": sprite.blocks[flag]["fields"]["TOWARDS"][0]}
-    if sprite.blocks[flag]["opcode"] in ["looks_costume"]:
-        return {"COSTUME": sprite.blocks[flag]["fields"]["COSTUME"][0]}
-    if sprite.blocks[flag]["opcode"] in ["looks_backdrops"]:
-        return {"COSTUME": sprite.blocks[flag]["fields"]["BACKDROP"][0]}
-    if sprite.blocks[flag]["opcode"] in ["looks_costumenumbername","looks_backdropnumbername"]:
-        return {"TYPE": sprite.blocks[flag]["fields"]["NUMBER_NAME"][0]}
-    if sprite.blocks[flag]["opcode"] in ["data_setvariableto","data_changevariableby"]:
-        result={"VARIABLE":sprite.blocks[flag]["fields"]["VARIABLE"][1]} 
-    if sprite.blocks[flag]["opcode"] in ["data_addtolist",
-                                         "data_deleteoflist",
-                                         "data_deletealloflist",
-                                         "data_itemoflist",
-                                         "data_insertatlist",
-                                         "data_replaceitemoflist",
-                                         "data_itemnumoflist",
-                                         "data_lengthoflist",
-                                         "data_listcontainsitem",
-                                         "data_showlist",
-                                          "data_hidelist"
-                                         ]:
-        result={"LIST":sprite.blocks[flag]["fields"]["LIST"][1]}
-    if sprite.blocks[flag]["opcode"]=="control_create_clone_of_menu":
-        #logging.debug(sprite.blocks[flag]["fields"]["CLONE_OPTION"][0])
-        return {"CLONE_OPTION":sprite.blocks[flag]["fields"]["CLONE_OPTION"][0]}    
-    opcode=sprite.blocks[flag]["opcode"]
-    if opcode=="control_create_clone_of":
-        result["CLONE_OPTION"] = runcode(sprite,sprite.blocks[flag]["inputs"]["CLONE_OPTION"][1])
-        return result
     
-    for i, j in input1.items():
-        if isinstance(j[1], list):#有可能是字面值
-            if len(j[1])==2:#字面值对应列表长度为二
-                result[i] = j[1][1]
-            else:#变量对应列表长度为三
-                result[i]=getvaluable(sprite,j[1][2])    
+    input1: dict = sprite.blocks[flag]["inputs"].copy()#要改动
+    field1: dict = sprite.blocks[flag]["fields"]
+    result = {}
+    words_shouldnotrun=["SUBSTACK","SUBSTACK2","SUBSTACK3"]
+    for key, value in input1.copy().items():#copy防止修改原字典报错
+        if key.upper() in words_shouldnotrun:
+            result[key.upper()]=value[1]
+            input1.pop(key)
+    for key, value in field1.items():
+        if "VARIABLE" == key:#variable有两个属性，取第二个id，第一个是变量名
+            result[key.upper()] = value[1]
         else:
-            
-            for k in ["operator_","data_","looks_"]:#以这些开头的要求值
-                if opcode.startswith(k):
-                    result[i] = runcode(sprite,j[1])
-                    break
-            else:#countrol类的一些积木，不要求值，则直接取值    
-                result[i] =  j[1]
-    logging.debug(result)#这行随时要用
+            result[key.upper()] = value[0]
+    for key, value in input1.items():
+        logging.debug((key, value))
+        if value[1][0].__class__==int:
+            result[key.upper()] = value[1][1]
+        else:
+            result[key.upper()]=runcode(sprite,value[1])    
+        
 
-    return result
+    logging.debug(result) 
+    return result   
 def getvaluable(sprite,id) -> str:
+    
     if id in stage.variables:
         return safe_str(stage.variables[id])
     if id in sprite.variables:
         return safe_str(sprite.variables[id])
+    
 def setvaluable(sprite,id,obj) -> None:
+    #print(sprite,id,obj)
+    logging.debug(stage.variables)
     if id in stage.variables:
         stage.variables[id]= safe_str(obj)
-    if id in sprite.variables:
-        stage.variables[id]=safe_str(obj)
+        
+    elif id in sprite.variables:
+        sprite.variables[id]=safe_str(obj)
 def getlist(sprite,id):
     #logging.debug((sprite,id,stage.lists,sprite.lists))
     if id in stage.lists:
@@ -234,12 +211,12 @@ class Sprite(pygame.sprite.Sprite):
     def control_if(self, flag: str) -> None:
         dic=S_eval(self,flag)
         logging.debug(dic)
-        if runcode(self,dic["CONDITION"])=="True":
+        if dic["CONDITION"]=="True":
             runcode(self,dic["SUBSTACK"])
     def control_if_else(self, flag: str) -> None:
         dic=S_eval(self,flag)
         logging.debug(dic)
-        if runcode(self,dic["CONDITION"])=="True":
+        if dic["CONDITION"]=="True":
             runcode(self, dic["SUBSTACK"])
         else:
             runcode(self, dic["SUBSTACK2"])   
@@ -312,7 +289,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def motion_pointtowards(self, flag:str) -> None:
         dic = S_eval(self, flag)
-        self.direction = safe_float(runcode(self,dic["TOWARDS"]))
+        self.direction = safe_float(dic["TOWARDS"])
 
     def motion_pointtowards_menu(self, flag:str):
         dic = S_eval(self, flag)
@@ -560,7 +537,7 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(self.variables)
     def data_changevariableby(self,flag):
         dic=S_eval(self,flag)
-        #logging.debug(dic)
+        logging.debug(dic)
         variable=dic["VARIABLE"]
         value=dic["VALUE"]
         logging.debug((safe_float(value),safe_float(getvaluable(self,variable)),self.variables))
@@ -569,6 +546,7 @@ class Sprite(pygame.sprite.Sprite):
                     safe_str(safe_float(value)+safe_float(getvaluable(self,variable)))
                     )
         logging.debug(self.variables)
+        logging.debug(stage.variables)
     def control_stop(self,flag):
         global done
         #logging.error("结束了")
