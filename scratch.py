@@ -784,9 +784,9 @@ def main():
     # 渲染线程主循环
     while not done:
         # 处理事件
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                done = True
+        event = pygame.event.wait()
+        if event.type == pygame.QUIT:
+            done = True
 
         # 填充窗口颜色
         screen.fill((255, 255, 255))
