@@ -644,7 +644,16 @@ class Sprite(pygame.sprite.Sprite):
         runcode(self,self.blocks[flag]["next"])
     def control_delete_this_clone(self,flag):
         if self.clone_mode==1:
-            self.clone_mode=2    
+            self.clone_mode=2   
+    def sensing_keypressed(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        import keymap
+        return safe_str(keys_pressed[keymap.keymap[dic["KEY_OPTION"]]])
+    def sensing_keyoptions(self,flag):  
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return dic['KEY_OPTION']         
     
             
         
