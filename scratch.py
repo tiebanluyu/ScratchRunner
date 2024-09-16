@@ -8,6 +8,7 @@ import random
 import zipfile
 import os
 from drawtext import *
+import time
 
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -157,7 +158,7 @@ class Sprite(pygame.sprite.Sprite):
         self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
-        #self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(self.image)
         drawtext(self,screen)
 
     def motion_goto(self, flag) -> None:
@@ -653,7 +654,33 @@ class Sprite(pygame.sprite.Sprite):
     def sensing_keyoptions(self,flag):  
         dic=S_eval(self,flag)
         logging.debug(dic)
-        return dic['KEY_OPTION']         
+        return dic['KEY_OPTION']   
+    def sensing_timer(self,flag=None):
+        return safe_str(time.time()-stage.time)
+    def sensing_resettimer(self,flag=None):
+        stage.time=time.time()
+    def collision(self,others):
+        offset_x = others.x - self.x
+        offset_y = others.y - self.y
+        if self.mask.overlap(others.mask, (offset_x, offset_y)):
+            print("角色碰撞了！")   
+            return True 
+        else:
+            return False
+    def sensing_touchingobject(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        for i in sprite_list:
+            if i.name==dic["TOUCHINGOBJECTMENU"]:
+                return safe_str(self.collision(i))
+        else:
+            raise Exception("没有找到"+dic["TOUCHINGOBJECTMENU"]+"这个角色")    
+    def sensing_touchingobjectmenu(self,flag):
+        dic=S_eval( self,flag)  
+        logging.debug(dic)
+        return dic['TOUCHINGOBJECTMENU']
+        
+    
     
             
         
@@ -774,6 +801,7 @@ for i in t["targets"]:
     logging.info(variables_name)    
     if sprite.isStage:
         stage=sprite
+        stage.time=time.time()
     for flag, code in sprite.blocks.items():
         if code["opcode"] == "event_whenflagclicked":
             # print(flag)
