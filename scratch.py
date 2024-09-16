@@ -9,6 +9,7 @@ import zipfile
 import os
 from drawtext import *
 import time
+from typing import List, Tuple,Literal
 
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -659,17 +660,26 @@ class Sprite(pygame.sprite.Sprite):
         return safe_str(time.time()-stage.time)
     def sensing_resettimer(self,flag=None):
         stage.time=time.time()
-    def collision(self,others):
+    def collision(self,others:"Sprite"|Literal["_mouse_"]):
+        logging.debug(others)   
+        if others=="_mouse_":
+            mouse_x,mouse_y=pygame.mouse.get_pos()
+            others=Sprite({"x":mouse_x,"y":mouse_y,"name":"mouse"})
+            others.mask=pygame.mask.Mask((10,10),True)
+            logging.debug(others.mask)
         offset_x = others.x - self.x
         offset_y = others.y - self.y
         if self.mask.overlap(others.mask, (offset_x, offset_y)):
             print("角色碰撞了！")   
             return True 
         else:
+            print("角色没碰撞")
             return False
     def sensing_touchingobject(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
+        if dic["TOUCHINGOBJECTMENU"]=="_mouse_":
+            return safe_str(self.collision("_mouse_"))
         for i in sprite_list:
             if i.name==dic["TOUCHINGOBJECTMENU"]:
                 return safe_str(self.collision(i))
