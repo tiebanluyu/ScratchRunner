@@ -159,6 +159,7 @@ class Sprite(pygame.sprite.Sprite):
         self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
+        #pygame.draw.rect(screen, (255, 0, 0),self.rect, 2)
         self.mask = pygame.mask.from_surface(self.image)
         drawtext(self,screen)
 
@@ -664,22 +665,34 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(others)   
         if others=="_mouse_":
             mouse_x,mouse_y=pygame.mouse.get_pos()
-            others=Sprite({"x":mouse_x,"y":mouse_y,"name":"mouse"})
+            mouse_x/=2
+            mouse_y/=2
+            rect=pygame.Rect(mouse_x-5,mouse_y-5,10,10)
+            others=Sprite({"x":mouse_x,"y":mouse_y,"name":"mouse","rect":rect})
             others.mask=pygame.mask.Mask((10,10),True)
-            logging.debug(others.mask)
-        offset_x = others.x - self.x
-        offset_y = others.y - self.y
-        if self.mask.overlap(others.mask, (offset_x, offset_y)):
-            print("角色碰撞了！")   
-            return True 
+            logging.debug(others.rect)
+        if others=="_edge_":
+            if not (0 <=self.rect.left <= self.rect.right <= 480):
+                return True
+            if not (0 <=self.rect.top <= self.rect.bottom <= 360):
+                return True
+            return False
+                 
+            
+        #粗略检测矩形，后续可以加入精细检测    
+        if self.rect.colliderect(others.rect):
+            print("角色碰撞了！")
+            return True
         else:
-            print("角色没碰撞")
+            print("角色没有碰撞")
             return False
     def sensing_touchingobject(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
         if dic["TOUCHINGOBJECTMENU"]=="_mouse_":
             return safe_str(self.collision("_mouse_"))
+        if dic["TOUCHINGOBJECTMENU"]=="_edge_":
+            return safe_str(self.collision("_edge_"))
         for i in sprite_list:
             if i.name==dic["TOUCHINGOBJECTMENU"]:
                 return safe_str(self.collision(i))
