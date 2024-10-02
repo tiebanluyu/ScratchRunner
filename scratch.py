@@ -745,6 +745,17 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         logging.debug(dic)
         return safe_str(180-pygame.mouse.get_pos()[1]/2)
+    def sensing_dayssince2000(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(time.time()/86400-10957)#10957是2000年1月1日距离1970年1月1日的天数
+    def sensing_username(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(os.getlogin())#获取用户名,但获取windows用户名有点扯
+    def sensing_loudness(self,flag):
+        logging.warning("声音检测功能暂未实现")
+        return safe_str(100)
             
         
     
