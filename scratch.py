@@ -703,12 +703,19 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         return dic['TOUCHINGOBJECTMENU']
     def sensing_distancetomenu(self,flag) -> Tuple[int] :
+        """
+        返回值按照pygame480*360坐标系
+        """
         dic=S_eval(self,flag)
         logging.debug(dic)
         if dic["DISTANCETOMENU"]=="_mouse_":
             mouse_x,mouse_y=pygame.mouse.get_pos()
             return (mouse_x/2,mouse_y/2)
-    def sensing_distanceto(self,flag):
+        else:
+            for i in sprite_list:
+                if i.name==dic["DISTANCETOMENU"]:
+                    return positionmap1(i.x,i.y)
+    def sensing_distanceto(self,flag) -> str:
         dic=S_eval(self,flag)
         logging.debug(dic)
         
