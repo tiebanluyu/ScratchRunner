@@ -727,6 +727,24 @@ class Sprite(pygame.sprite.Sprite):
         y=safe_float(y-dest_y)
         logging.debug((x,y))
         return safe_str(math.sqrt(x**2+y**2))
+    def sensing_mousedown(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(pygame.mouse.get_pressed()[0])
+    def sensing_mousex(self,flag):
+        """
+        由于要传到scratch层，所以按照scratch的坐标系
+        """
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(pygame.mouse.get_pos()[0]/2-240)
+    def sensing_mousey(self,flag):
+        """
+        由于要传到scratch层，所以按照scratch的坐标系
+        """
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        return safe_str(180-pygame.mouse.get_pos()[1]/2)
             
         
     
