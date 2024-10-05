@@ -11,11 +11,16 @@ def drawtext(sprite,surface):
     rect=sprite.rect
     
     text=sprite.words
+    if len(text)>50:
+        #每10字符换行难度大，暂时不做处理        
+        text=text[:10]+"..."
+        
+        
     fontColor = (0, 0, 0)
     textsurface=font.render(text,True, fontColor)
-    
-    pygame.draw.rect(surface, (255, 255, 255), (*rect.topright, *textsurface.get_size()),0)
-    pygame.draw.rect(surface, (0, 0, 0), (rect.topright[0]-5,rect.topright[1]-5, textsurface.get_size()[0]+10,textsurface.get_size()[1]+10),2)
+    pygame.draw.rect(surface, (255, 255, 255), (rect.topright[0]-5,rect.topright[1]-5, textsurface.get_size()[0]+10,textsurface.get_size()[1]+10),0,10)
+    pygame.draw.rect(surface, (255, 255, 255), (*rect.topright, *textsurface.get_size()),0,10)
+    pygame.draw.rect(surface, (0, 0, 0), (rect.topright[0]-5,rect.topright[1]-5, textsurface.get_size()[0]+10,textsurface.get_size()[1]+10),2,10)
     surface.blit(textsurface,rect.topright)
 def drawvariable(moniter,text,surface):
     #font =pygame.font.Font("HarmonyOS_Sans_SC_Regular.ttf",24)
