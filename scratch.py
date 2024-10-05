@@ -514,15 +514,19 @@ class Sprite(pygame.sprite.Sprite):
     def operator_and(self,flag) -> str:
         dic=S_eval(self,flag)
         #logging.debug(dic)
-        return safe_str(safe_bool(dic["OPERAND1"]) and safe_bool(dic["OPERAND2"]))
+
+        #用户可能不会往框中放置积木，所以默认值是False
+        return safe_str(safe_bool(dic.get("OPERAND1",False)) 
+                        and safe_bool(dic.get("OPERAND2",False)))
     def operator_or(self,flag) -> str:
         dic=S_eval(self,flag)
         #logging.debug(dic)
-        return safe_str(safe_bool(dic["OPERAND1"]) or safe_bool(dic["OPERAND2"]))
+        return safe_str(safe_bool(dic.get("OPERAND1",False)) 
+                        or safe_bool(dic.get("OPERAND2",False)))
     def operator_not(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        return safe_str(not safe_bool(dic["OPERAND"]))
+        return safe_str(not dic.get("OPERAND",False))
     def operator_join(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
