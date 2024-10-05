@@ -73,7 +73,8 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
 
     """
 
-    
+    if flag is None:
+        return {}
     input1: dict = sprite.blocks[flag]["inputs"].copy()#要改动
     field1: dict = sprite.blocks[flag]["fields"]
     result = {}
@@ -88,14 +89,30 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
         else:
             result[key.upper()] = value[0]
     for key, value in input1.items():
-        #logging.debug((key, value))
+        logging.debug((key, value))
+        if value[0] == 1:#常数
+            result[key.upper()]=value[1][1]
+        elif value[0] == 2:#目前没遇到
+            logging.error("未知的参数标签：2")
+        elif value[0] == 3:
+            if value[1][0].__class__==str:
+                result[key.upper()]=runcode(sprite,value[1])
+            else:
+                result[key.upper()] = getvaluable(sprite,value[1][2])
+        else:
+            logging.error("未知的参数标签："+str(value[0]))        
+
+        """
         if value[1][0].__class__==int:
             result[key.upper()] = value[1][1]
+        elif len(value[1])==3:
+            
+            result[key.upper()] = getvaluable(sprite,value[1][1])
         else:
-            result[key.upper()]=runcode(sprite,value[1])    
+            result[key.upper()]=runcode(sprite,value[1])    """
         
 
-    #logging.debug(result) 
+    logging.debug(result) 
     return result   
 def getvaluable(sprite,id) -> str:
     
@@ -112,11 +129,14 @@ def setvaluable(sprite,id,obj) -> None:
         
     elif id in sprite.variables:
         sprite.variables[id]=safe_str(obj)
+        
 def getlist(sprite,id):
     #logging.debug((sprite,id,stage.lists,sprite.lists))
     if id in stage.lists:
+        logging.debug(stage.lists[id])
         return stage.lists[id]
     if id in sprite.lists:
+        logging.debug(sprite.lists[id])
         return sprite.lists[id]
 
 
@@ -795,7 +815,9 @@ class Moniter:
             thelist=getlist(sprite,self.id)
             drawlist(self,thelist,screen)    
         else:
-            value=getattr(sprite,self.opcode)()
+            value=getattr(sprite,self.opcode)(None)
+            #这些当做显示框的积木都不用输入参数
+            #但输入时需要输入参数，所以这里用None代替
             front=" "+str(sprite)+":"+self.opcode.replace("motion_","")
             drawvariable(self,front+value,screen)
 
@@ -883,7 +905,6 @@ for i in t["targets"]:
     for flag, code in sprite.blocks.items():
         if code["opcode"] == "event_whenflagclicked":
             # print(flag)
-            flag = code["next"]
             thread = threading.Thread(
                 name=str(sprite) + flag, target=runcode, args=(sprite, flag)
             )
