@@ -35,14 +35,18 @@ def drawvariable(moniter,text,surface):
         text2=str(text)
     logging.debug((text1,text2))    
     fontColor = (0, 0, 0)
-    textsurface=font.render(text1,True, fontColor)
+    textsurface=font.render(text1+text2+" ",True, fontColor)
     position=(moniter.x,moniter.y)   
-    pygame.draw.rect(surface, (230,240,255), (*position, *textsurface.get_size()),0)
-    
+    pygame.draw.rect(surface, (230,240,255), (*position, *textsurface.get_size()),0,3)
+    textsurface=font.render(text1,True, fontColor)
+    surface.blit(textsurface,position)
+
     fontColor=(255,255,255)
-    textsurface=font.render(text2,True, fontColor)   
+       
     position=(moniter.x+textsurface.get_size()[0]+5,moniter.y)
-    pygame.draw.rect(surface, (255, 140, 26), (*position, *textsurface.get_size()),0)
+    #刻意将position计算放在text渲染前，这里textsurface是上一个的
+    textsurface=font.render(text2,True, fontColor)
+    pygame.draw.rect(surface, (255, 140, 26), (*position, *textsurface.get_size()),0,3)
     surface.blit(textsurface,position)
     
     #logging.debug("drawvariable")
