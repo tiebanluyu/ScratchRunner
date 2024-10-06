@@ -24,11 +24,24 @@ def drawtext(sprite,surface):
     surface.blit(textsurface,rect.topright)
 def drawvariable(moniter,text,surface):
     #font =pygame.font.Font("HarmonyOS_Sans_SC_Regular.ttf",24)
+    #logging.debug(text)
     if not moniter.visible:
         return
-    fontColor = (255, 255, 255)
-    textsurface=font.render(text,True, fontColor)
-    position=(moniter.x,moniter.y)
+    if moniter.sprite.isStage:
+        text1=moniter.name
+        text2=str(text)
+    else:
+        text1=str(moniter.sprite)+moniter.name
+        text2=str(text)
+    logging.debug((text1,text2))    
+    fontColor = (0, 0, 0)
+    textsurface=font.render(text1,True, fontColor)
+    position=(moniter.x,moniter.y)   
+    pygame.draw.rect(surface, (230,240,255), (*position, *textsurface.get_size()),0)
+    
+    fontColor=(255,255,255)
+    textsurface=font.render(text2,True, fontColor)   
+    position=(moniter.x+textsurface.get_size()[0]+5,moniter.y)
     pygame.draw.rect(surface, (255, 140, 26), (*position, *textsurface.get_size()),0)
     surface.blit(textsurface,position)
     

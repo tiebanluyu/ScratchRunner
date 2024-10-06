@@ -789,10 +789,21 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Moniter:
+    def __str__(self):
+        return self.params["VARIABLE"]
+    @property
+    def name(self):
+        return self.params["VARIABLE"]
     def __init__(self,dict1):
         for name, value in dict1.items():
             #logging.debug((name, value))
             setattr(self, name, value)
+        self.sprite=stage#全局变量默认从stage中找
+
+        if self.spriteName is not  None:
+            for i in sprite_list:               
+                if str(i)==self.spriteName:
+                    self.sprite=i
             
         if self.mode=="list":
             self.show_y=0    
@@ -802,19 +813,18 @@ class Moniter:
         if not self.visible:
             return
         variablename=self.id
-        sprite=stage#全局变量默认从stage中找
-        for i in sprite_list:               
-            if str(i)==self.spriteName:
-                sprite=i
+        
+        sprite=self.sprite        
         if self.opcode=="data_variable":
                     
             value=getvaluable(sprite,variablename)
             #logging.debug(self.params["VARIABLE"])
             #logging.debug(value)
-            text=" "+self.params["VARIABLE"]+":"+value+" "
+            #text=" "+self.params["VARIABLE"]+":"+value+" "
+            """
             if sprite!=stage:
-                text=" "+str(sprite)+text
-            drawvariable(self,text,screen)
+                text=" "+str(sprite)+text"""
+            drawvariable(self,value,screen)
         elif self.opcode=="data_listcontents":
             thelist=getlist(sprite,self.id)
             drawlist(self,thelist,screen)    
