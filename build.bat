@@ -1,2 +1,2 @@
-pyinstaller -F scratch.py
+pyinstaller -D scratch.py
 del /q /s build scratch.spec

@@ -10,6 +10,7 @@ import os
 from drawtext import *
 import time
 from typing import List, Tuple,Literal
+import sys
 
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
@@ -780,6 +781,14 @@ class Sprite(pygame.sprite.Sprite):
     def sensing_loudness(self,flag):
         logging.warning("声音检测功能暂未实现")
         return safe_str(100)
+    def procedures_call(self,flag2):
+        dic=S_eval(self,flag2)
+        tagname=self.blocks[flag2]["mutation"]["proccode"]
+        for flag1, code in self.blocks.items():
+            if code["opcode"] == "procedures_prototype":
+                self.procedure(flag1,flag2,dic)
+    def procedure(self,flag1,flag2,argcs):
+        logging.debug((self,flag1,flag2,argcs))
             
         
     
@@ -842,7 +851,7 @@ def runcode(sprite: Sprite, flag: str)  :
     global done
     #done:bool
     if done:
-        exit()
+        sys.exit()
 
     if flag == None:
         return
