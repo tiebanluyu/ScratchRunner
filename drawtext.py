@@ -33,7 +33,7 @@ def drawvariable(moniter,text,surface):
     else:
         text1=str(moniter.sprite)+moniter.name
         text2=str(text)
-    logging.debug((text1,text2))    
+    #logging.debug((text1,text2))    
     fontColor = (0, 0, 0)
     textsurface=font.render(text1+text2+" ",True, fontColor)
     position=(moniter.x,moniter.y)   

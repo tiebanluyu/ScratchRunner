@@ -13,7 +13,7 @@ from typing import List, Tuple,Literal
 import sys
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s-%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s %(filename)s -%(message)s"
 )
 
 from time import sleep
@@ -147,6 +147,8 @@ class Sprite(pygame.sprite.Sprite):
         for name, value in dict1.items():  # 原来仅仅改变__dict__会带来问题
             setattr(self, name, value)
         self.words=""    #没说话
+        self.argument_dict={}#这个字典是用来存储函数调用的参数的
+        #以threadname、argname为key，argvalue为value的字典
 
     def __str__(self) ->str:
         return self.name
@@ -783,14 +785,60 @@ class Sprite(pygame.sprite.Sprite):
         return safe_str(100)
     def procedures_call(self,flag2):
         dic=S_eval(self,flag2)
+        #procedures_definition
         tagname=self.blocks[flag2]["mutation"]["proccode"]
+        #logging.debug(tagname)
         for flag1, code in self.blocks.items():
             if code["opcode"] == "procedures_prototype":
-                self.procedure(flag1,flag2,dic)
-    def procedure(self,flag1,flag2,argcs):
-        logging.debug((self,flag1,flag2,argcs))
+                flag_procedure_prototype=flag1
+                
+        for flag1, code in self.blocks.items():  
+            try:
+                if code["inputs"]["custom_block"][1]== flag_procedure_prototype:
+                    flag_procedure_definition=flag1
+            except:
+                pass         
+        self.procedure({
+            "flag_procedure_prototype":flag_procedure_prototype,
+            "flag_procedure_definition":flag_procedure_definition,
+            "tagname":tagname,
+            "callerflag":flag2,
+
+        },
+        dic
+        )           
+    def procedure(self,flags,argcs):
+        logging.debug((self,flags,argcs))
+        #寻找调用这个过程的积木块的顶端
+        top_flag=flags["callerflag"]
+        while self.blocks[top_flag]["parent"] != None:
+            top_flag=self.blocks[top_flag]["parent"]
+        logging.debug(top_flag)
+        #找到过程定义的块
+        logging.debug(argcs)
+        for key,value in argcs.items():
+            #在读取参数时，scratch完全按照名字检索，所以要把id转成名字
+            mutation=self.blocks[flags["flag_procedure_prototype"]]["mutation"]
+            #去你妈的，mutation["argumentids"]是一个字符串，长得像一个列表，像这样 "["a","b","c"]"
+            #在字符状态下，先全部统一大写，然后再用eval转成列表，再用zip和dict转成字典
+            #最后实现这样的效果
+            #dict1={'FWV;F_+X!EOJ}8AFV[*)': 'content', 'VS}LUVVOE?WQMI#.^D}P': 'secs'}
+            mutation["argumentids"]="".join(list(map(str.upper,mutation["argumentids"])))
+            dict1=dict(zip(eval(mutation["argumentids"]),eval(mutation["argumentnames"])))
+            logging.debug(dict1)
+            name=dict1[key]
             
-        
+            self.argument_dict[(threading.current_thread(),name)]=value
+            logging.debug(self.argument_dict)
+        runcode(self,flags["flag_procedure_definition"])
+
+    def argument_reporter_string_number(self,flag):
+        dic=S_eval(self,flag)
+        logging.debug(dic)
+        logging.debug(self.argument_dict)
+        return self.argument_dict[(threading.current_thread(),dic["VALUE"])]    
+            
+    procedure_definition=event_whenflagclicked
     
     
             
