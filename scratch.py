@@ -833,6 +833,9 @@ class Sprite(pygame.sprite.Sprite):
         runcode(self,flags["flag_procedure_definition"])
 
     def argument_reporter_string_number(self,flag):
+        #按照变量名获取参数
+        #紫色块变量名完全按照名字检索，完全不用考虑id
+        #这里变量名放在self.argument_dict[(threading.current_thread(),name)]中
         dic=S_eval(self,flag)
         logging.debug(dic)
         logging.debug(self.argument_dict)
