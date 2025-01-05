@@ -809,13 +809,7 @@ class Sprite(pygame.sprite.Sprite):
         )           
     def procedure(self,flags,argcs):
         logging.debug((self,flags,argcs))
-        #寻找调用这个过程的积木块的顶端
-        top_flag=flags["callerflag"]
-        while self.blocks[top_flag]["parent"] != None:
-            top_flag=self.blocks[top_flag]["parent"]
-        logging.debug(top_flag)
-        #找到过程定义的块
-        logging.debug(argcs)
+        
         for key,value in argcs.items():
             #在读取参数时，scratch完全按照名字检索，所以要把id转成名字
             mutation=self.blocks[flags["flag_procedure_prototype"]]["mutation"]
