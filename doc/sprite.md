@@ -46,4 +46,9 @@ costume是一个字典，包含所要显示的图片相关信息，包括图片�
 但是project.json中这个参数是缺失的，
 不能简单切片，用dic.get("OPERAND1",False)
 
+#### 字符串处理用python自带的，简单
+
+## data 变量
+
+
 
