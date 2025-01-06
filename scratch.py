@@ -134,11 +134,15 @@ def setvaluable(sprite,id,obj) -> None:
 def getlist(sprite,id):
     #logging.debug((sprite,id,stage.lists,sprite.lists))
     if id in stage.lists:
-        logging.debug(stage.lists[id])
+        #logging.debug(stage.lists[id])
         return stage.lists[id]
-    if id in sprite.lists:
+    elif id in sprite.lists:
         logging.debug(sprite.lists[id])
         return sprite.lists[id]
+    else:
+        raise ValueError("list not found:"+id)
+list_name_to_id={}    
+
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -158,6 +162,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def draw(self) -> None:
         costume = self.costumes[self.currentCostume]
+        #logging.debug(costume)
         
         try:
             image = pygame.image.load(costume["md5ext"])
@@ -584,40 +589,69 @@ class Sprite(pygame.sprite.Sprite):
     def data_addtolist(self,flag):
         dic=S_eval(self,flag)
         #logging.debug(dic)
-        thelist=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         thelist.append(safe_str(dic["ITEM"]))
         #logging.debug(thelist)   
     def data_deleteoflist(self,flag):
         dic=S_eval(self,flag)   
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         thelist.pop(safe_int(dic["INDEX"])-1)
 
     def data_deletealloflist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        logging.debug(list_name_to_id)
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         #thelist.pop(safe_int(dic["INDEX"])-1)
         thelist.clear()
     def data_itemoflist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         return safe_str(thelist[safe_int(dic["INDEX"])-1])
     def data_insertatlist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         thelist.insert(safe_int(dic["INDEX"])-1,safe_str(dic["ITEM"]))
     def data_replaceitemoflist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         thelist[safe_int(dic["INDEX"])-1]=safe_str(dic["ITEM"])  
     def data_itemnumoflist(self,flag):  
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"]) 
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         for i in thelist:
             if i==safe_str(dic["ITEM"]):
                 return safe_str(thelist.index(i)+1)
@@ -625,12 +659,20 @@ class Sprite(pygame.sprite.Sprite):
     def data_lengthoflist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         return safe_str(len(thelist))
     def data_listcontainsitem(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
-        thelist:list[str]=getlist(self,dic["LIST"])
+        if (self,dic["LIST"]) in list_name_to_id:
+            id=list_name_to_id[(self,dic["LIST"])]
+        else:
+            id=list_name_to_id[(stage,dic["LIST"])]    
+        thelist:list[str]=getlist(self,id)
         return safe_str(safe_str(dic["ITEM"]) in thelist)
     def data_showlist(self,flag):
         dic=S_eval(self,flag)
@@ -948,25 +990,32 @@ for i in t["targets"]:
     #clone_mode=1表示克隆
     #clone_mode=2表示克隆体被删除
     sprite = Sprite(i)
-    
     sprite_list.append(sprite)
+
+    #提取角色的变量和列表
     sprite.variables={}
     sprite.lists={}
     variables_name={}
     #logging.debug(sprite.variables)
+
     for j in i["variables"].items():
         #logging.debug(j)
         sprite.variables[j[0]]=safe_str(j[1][1])
         variables_name[j[0]]=safe_str(j[1][0])
     for j in i["lists"].items():
-        #logging.debug(j)
+        logging.debug(j)
+        listid=j[0]
+        listname=j[1][0]
+        list_name_to_id.update({(sprite,listname):listid})
         thelist=j[1][1]
         thelist=[safe_str(k) for k in thelist]
         sprite.lists[j[0]]=thelist
-        #variables_name[j[0]]=safe_str(j[1][0])    
+     
     logging.info(f"提取{sprite}的变量"  )  
     logging.info(sprite.variables)
-    logging.info(variables_name)    
+    logging.info(variables_name)   
+    
+
     if sprite.isStage:
         stage=sprite
         stage.time=time.time()
@@ -978,6 +1027,7 @@ for i in t["targets"]:
             )
             thread.start()
             # runcode(sprite,flag)
+logging.debug(list_name_to_id)         
 moniter_list=[]            
 for i in t["monitors"]:
     moniter=Moniter(i)
