@@ -21,3 +21,5 @@ project.json中是这么定义的，不是我确定的。
 setvaluable(id,value)可以修改变量的值，getvaluable(id)可以获取变量的值。
 这个是python层的。
 scratch层的变量读取，直接包含在对应积木的参数中，没有自己独立的积木
+scratch层的修改通过data_setvariableto积木实现。
+同时，data_changevariableby可以给变量增加或减少值。
