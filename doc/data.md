@@ -16,10 +16,22 @@ sprite.variables是会随着程序运行而变化的变量字典，id到变量�
 这也是为什么在scratch中，舞台不允许拥有自己的局部变量。
 project.json中是这么定义的，不是我确定的。
 
-##动态修改变量
+## 动态修改变量
 全局函数setvaluable和getvaluable是用来动态读取修改变量的函数。
 setvaluable(id,value)可以修改变量的值，getvaluable(id)可以获取变量的值。
 这个是python层的。
 scratch层的变量读取，直接包含在对应积木的参数中，没有自己独立的积木
 scratch层的修改通过data_setvariableto积木实现。
 同时，data_changevariableby可以给变量增加或减少值。
+
+# 列表
+继承自project.json，列表的文件结构如下：
+```
+"lists": { "lS=y2!Gk=K1sJCyF8=%g": ["1", ["111", "", "", "", ""]] }
+```
+sprite.lists[id][0]是列表的名称，sprite.lists[id][1]是列表的值（一个列表，每个元素是一个字符串，与scratch中的列表元素对应）。  
+## 读取列表
+getlist(id)可以获取列表的值。
+## 动态修改列表
+data_addtolist添加元素到列表中，data_deleteoflist删除元素。
+data_deletealloflist删除整个列表的元素。
