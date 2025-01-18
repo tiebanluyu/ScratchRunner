@@ -1,4 +1,5 @@
 # 讲一下project.json的格式
+这里的project.json是指在scratch中打开的项目文件，位于项目文件夹中，文件名为project.json。
 project分为targets 和monitors两大部分和extension meta两小部分
 # targets
 targets是一个列表，存储的对象代表scratch角色（含舞台）
@@ -45,3 +46,10 @@ targets是一个列表，存储的对象代表scratch角色（含舞台）
 | y | 会提供x，y坐标，以便在积木区放在一个合适的位置 |
 | inputs |大部分块的输入 |
 | fields |少部分块的输入 ,以选择什么的块居多|
+| currentCostume | 角色当前的造型，在costumes列表中的索引 |
+| costumes | 角色所有造型的列表 |
+| sounds | 角色所有声音的列表 |
+|volume | 声音的音量 |
+| layerOrder | 积木层级，越大越上层 |
+| rotationStyle | 旋转方式 ，用数字表示|
+| visible | 是否可见 ，可见为true |
