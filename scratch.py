@@ -13,7 +13,7 @@ from typing import List, Tuple,Literal
 import sys
 
 logging.basicConfig(
-    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s %(filename)s -%(message)s"
+    level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s %(funcName)s -%(message)s"
 )
 
 from time import sleep
@@ -74,30 +74,37 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
 
     """
 
-    if flag is None:
+    if flag is None:#有的块flag没有，这些块是编辑器里打勾的那些圆角块
         return {}
-    input1: dict = sprite.blocks[flag]["inputs"].copy()#要改动
-    field1: dict = sprite.blocks[flag]["fields"]
+    
+    _input: dict = sprite.blocks[flag]["inputs"].copy()#要改动
+    _field: dict = sprite.blocks[flag]["fields"].copy()
     result = {}
+
     words_shouldnotrun=["SUBSTACK","SUBSTACK2","SUBSTACK3"]
-    for key, value in input1.copy().items():#copy防止修改原字典报错
-        if key.upper() in words_shouldnotrun:
+    for key, value in _input.copy().items():#copy防止修改原字典报错
+        if key.upper() in words_shouldnotrun:#分支的块作为参数传递时不应该运行
             result[key.upper()]=value[1]
-            input1.pop(key)
-    for key, value in field1.items():
+            _input.pop(key)
+
+    for key, value in _field.items():#有的块是通过field实现输入的，主要是有下拉菜单的块
         if "VARIABLE" == key:#variable有两个属性，取第二个id，第一个是变量名
             result[key.upper()] = value[1]
         else:
             result[key.upper()] = value[0]
-    for key, value in input1.items():
+
+    for key, value in _input.items():
         logging.debug((key, value))
         if value[0] == 1:#常数
-            result[key.upper()]=value[1][1]
+            if value[1].__class__==str:#例外这种块是“移到···”块，要执行，不是常数。
+                result[key.upper()]=runcode(sprite,value[1])
+            else:
+                result[key.upper()]=value[1][1]
         elif value[0] == 2:#目前没遇到
             logging.error("未知的参数标签：2")
         elif value[0] == 3:
             if value[1][0].__class__==str:
-                result[key.upper()]=runcode(sprite,value[1])
+                result[key.upper()] = runcode(sprite,value[1])
             else:
                 result[key.upper()] = getvaluable(sprite,value[1][2])
         else:
@@ -198,7 +205,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def motion_goto_menu(self, flag) -> tuple[float, float]|None:
         dict1 = S_eval(self, flag)
-
+        logging.debug(dict1)
         to = dict1["TO"]
         if to == "_random_":
             
@@ -209,6 +216,7 @@ class Sprite(pygame.sprite.Sprite):
         if to == "_mouse_":
             mousepos = pygame.mouse.get_pos()
             return positionmap2(mousepos[0], mousepos[1])
+        logging.error(to)
         return None
 
     motion_glideto_menu = motion_goto_menu
@@ -966,17 +974,19 @@ def runcode(sprite: Sprite, flag: str)  :
 
     # 主程序从这里开始
     # 初始化Pygame
+logging.info("开始程序")    
 pygame.init()
     
 show_screen = pygame.display.set_mode(STAGE_SHOW_SIZE)
 screen=pygame.Surface(STAGE_SIZE)
-    
+logging.info("初始化pygame")    
 with zipfile.ZipFile("project.sb3") as f:
     filenamelist=f.namelist()
     #logging.debug(f.namelist())
     f.extractall()
 
 t = json.loads(open("project.json", "r", encoding="utf-8").read())
+logging.info("解析json文件")
 sprite_list = []  # 角色们
 clone_list=[]
 
@@ -1012,9 +1022,9 @@ for i in t["targets"]:
         sprite.lists[j[0]]=thelist
      
     logging.info(f"提取{sprite}的变量"  )  
-    logging.info(sprite.variables)
-    logging.info(variables_name)   
-    
+    logging.debug(sprite.variables)
+    logging.debug(variables_name)   
+   
 
     if sprite.isStage:
         stage=sprite
@@ -1027,15 +1037,17 @@ for i in t["targets"]:
             )
             thread.start()
             # runcode(sprite,flag)
+logging.info("提取变量完成") 
 logging.debug(list_name_to_id)         
 moniter_list=[]            
 for i in t["monitors"]:
     moniter=Moniter(i)
     moniter_list.append(moniter)
-
+logging.info("创建显示框完成")
 # 设置窗口标题
 pygame.display.set_caption("scratch")    
 # 渲染线程主循环
+logging.info("进入主循环")
 while not done:
     # 处理事件
     try:
@@ -1107,13 +1119,14 @@ while not done:
             
         clock.tick(FPS)
     except KeyboardInterrupt:
+        logging.error("键盘中断")
         done=True
         #raise KeyboardInterrupt    
 
         
 
 # 退出Pygame
-logging.info("退出程序")
+logging.warning("退出程序")
 sleep(0.25)
 for filename in filenamelist:
     if logging.getLogger().level<=10:
