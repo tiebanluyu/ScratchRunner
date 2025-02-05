@@ -213,10 +213,14 @@ class Sprite(pygame.sprite.Sprite):
             y = random.uniform(-180, 180)
             x = random.uniform(-240, 240)
             return (x, y)
-        if to == "_mouse_":
+        elif to == "_mouse_":
             mousepos = pygame.mouse.get_pos()
             return positionmap2(mousepos[0], mousepos[1])
-        logging.error(to)
+        else:
+            #logging.error(to)
+            for sprite in sprite_list:
+                if sprite.name == to:
+                    return (sprite.x, sprite.y)
         return None
 
     motion_glideto_menu = motion_goto_menu
@@ -330,21 +334,26 @@ class Sprite(pygame.sprite.Sprite):
         dic = S_eval(self, flag)
         self.direction = safe_float(dic["TOWARDS"])
 
-    def motion_pointtowards_menu(self, flag:str):
+    def motion_pointtowards_menu(self, flag:str) -> float:
         dic = S_eval(self, flag)
+        def pos2angle(x:int,y:int) -> float:
+            dx = x - self.x
+            dy = y - self.y
+            direction = 90 - math.degrees(math.atan2(dy, dx))
+            return direction
         if dic["TOWARDS"] == "_mouse_":
             mousepos = pygame.mouse.get_pos()
             mousepos = positionmap2(mousepos[0], mousepos[1])
-            dx = mousepos[0] - self.x
-            dy = mousepos[1] - self.y
-            direction = 90 - math.degrees(math.atan2(dy, dx))
-            return direction
-        else:
+            return pos2angle(*mousepos)
+        elif dic["TOWARDS"] == "_random_":
             import random
 
             direction = random.uniform(0, 360)
             return direction
-
+        else:
+            for sprite in sprite_list:
+                if sprite.name == dic["TOWARDS"]:
+                    return pos2angle(sprite.x, sprite.y)
     def motion_ifonedgebounce(self, flag:str=None):
         # 其实遇到边缘就反弹没有任何参数   
         #logging.debug((self.x>0,((self.direction%360)>180)))    
