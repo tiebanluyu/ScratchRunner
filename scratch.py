@@ -25,6 +25,10 @@ class Position:
         elif mode=="show":
             self.x=x/2-240
             self.y=180-y/2      
+    def __str__(self)->str:
+        return f"POSITION({self.x},{self.y})"   
+    def __repr__(self)->str:
+        return f"POSITION({self.x},{self.y})"    
     def scratch(self)->Tuple[int,int]:
         return self.x,self.y
     def pygame(self)->Tuple[int,int]:
@@ -220,7 +224,7 @@ class Sprite(pygame.sprite.Sprite):
         to = dict1["TO"]
         self.x, self.y = to.scratch()
 
-    def motion_goto_menu(self, flag) -> tuple[float, float]|None:
+    def motion_goto_menu(self, flag) -> Position:
         dict1 = S_eval(self, flag)
         logging.debug(dict1)
         to = dict1["TO"]
@@ -232,7 +236,7 @@ class Sprite(pygame.sprite.Sprite):
             return POSITION(x, y)
         elif to == "_mouse_":
             mousepos = Position(*pygame.mouse.get_pos(),"show")
-            return mousepos.scratch()
+            return mousepos
         else:
             #logging.error(to)
             for sprite in sprite_list:
@@ -811,7 +815,7 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         if dic["DISTANCETOMENU"]=="_mouse_":
             mouse_x,mouse_y=pygame.mouse.get_pos()
-            return POSITION(mouse_x,mouse_y,"show")
+            return Position(mouse_x,mouse_y,"show")
         else:
             for i in sprite_list:
                 if i.name==dic["DISTANCETOMENU"]:
@@ -820,9 +824,9 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         logging.debug(dic)
         
-        dest_x,dest_y=dic["DISTANCETOMENU"]
+        dest_x,dest_y=dic["DISTANCETOMENU"].scratch()
         
-        x,y=positionmap1(self.x,self.y)
+        x,y=self.x,self.y
         logging.debug((x,y))
         x=safe_float(x-dest_x)
         y=safe_float(y-dest_y)
