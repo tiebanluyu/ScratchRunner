@@ -15,7 +15,22 @@ import sys
 logging.basicConfig(
     level=logging.DEBUG, format="[%(levelname)s] line%(lineno)s %(funcName)s -%(message)s"
 )
-
+class Position:
+    def __init__(self,x:int,y:int,mode:str="scratch")->None:
+        if mode=="scratch":
+            self.x=x
+            self.y=y
+        elif mode=="pygame":
+            self.x, self.y = positionmap2(x, y)
+        elif mode=="show":
+            self.x=x/2-240
+            self.y=180-y/2      
+    def scratch(self)->Tuple[int,int]:
+        return self.x,self.y
+    def pygame(self)->Tuple[int,int]:
+        return positionmap1(self.x,self.y)
+    def show(self)->Tuple[int,int]:
+        return self.x*2+240,360-self.y*2          
 from time import sleep
 from rotate import blitRotate
 from variable import *
@@ -181,15 +196,17 @@ class Sprite(pygame.sprite.Sprite):
             )  # 位图精度高（否则一个一个点不美观），实际储存时图像会大一些
         if self.isStage:
             screen.blit(image, (0, 0))
-            return
+            return # stage没有direction属性
         if not self.visible:
             return
         
         image = pygame.transform.rotozoom(
                 image, 0, self.size/100
             )
-        direction = self.direction % 360  # 不是stage才有direction
-        x, y = positionmap1(self.x, self.y)
+        direction = self.direction % 360  # stage没有direction属性
+        #x, y = positionmap1(self.x, self.y)
+        position=Position(self.x,self.y)
+        x,y=position.pygame()
         rotatecentre = costume["rotationCenterX"]*(self.size/100), costume["rotationCenterY"]*(self.size/100)
         self.image,self.rect=blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
@@ -201,7 +218,7 @@ class Sprite(pygame.sprite.Sprite):
     def motion_goto(self, flag) -> None:
         dict1 = S_eval(self, flag)
         to = dict1["TO"]
-        self.x, self.y = to
+        self.x, self.y = to.scratch()
 
     def motion_goto_menu(self, flag) -> tuple[float, float]|None:
         dict1 = S_eval(self, flag)
@@ -212,15 +229,15 @@ class Sprite(pygame.sprite.Sprite):
 
             y = random.uniform(-180, 180)
             x = random.uniform(-240, 240)
-            return (x, y)
+            return POSITION(x, y)
         elif to == "_mouse_":
-            mousepos = pygame.mouse.get_pos()
-            return positionmap2(mousepos[0], mousepos[1])
+            mousepos = Position(*pygame.mouse.get_pos(),"show")
+            return mousepos.scratch()
         else:
             #logging.error(to)
             for sprite in sprite_list:
                 if sprite.name == to:
-                    return (sprite.x, sprite.y)
+                    return POSITION(sprite.x, sprite.y)
         return None
 
     motion_glideto_menu = motion_goto_menu
@@ -788,19 +805,17 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval( self,flag)  
         logging.debug(dic)
         return dic['TOUCHINGOBJECTMENU']
-    def sensing_distancetomenu(self,flag) -> Tuple[int] :
-        """
-        返回值按照pygame480*360坐标系
-        """
+    def sensing_distancetomenu(self,flag) -> Position :
+        
         dic=S_eval(self,flag)
         logging.debug(dic)
         if dic["DISTANCETOMENU"]=="_mouse_":
             mouse_x,mouse_y=pygame.mouse.get_pos()
-            return (mouse_x/2,mouse_y/2)
+            return POSITION(mouse_x,mouse_y,"show")
         else:
             for i in sprite_list:
                 if i.name==dic["DISTANCETOMENU"]:
-                    return positionmap1(i.x,i.y)
+                    return Position(i.x,i.y)
     def sensing_distanceto(self,flag) -> str:
         dic=S_eval(self,flag)
         logging.debug(dic)
