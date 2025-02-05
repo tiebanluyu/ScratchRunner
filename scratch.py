@@ -119,8 +119,10 @@ def S_eval(sprite: "Sprite", flag: str) -> dict:
                 result[key.upper()]=runcode(sprite,value[1])
             else:
                 result[key.upper()]=value[1][1]
-        elif value[0] == 2:#目前没遇到
-            logging.error("未知的参数标签：2")
+        elif value[0] == 2:#块
+            #logging.error("未知的参数标签：2")
+            #breakpoint()
+            result[key]=value[1]
         elif value[0] == 3:
             if value[1][0].__class__==str:
                 result[key.upper()] = runcode(sprite,value[1])
@@ -275,8 +277,13 @@ class Sprite(pygame.sprite.Sprite):
     def control_if(self, flag: str) -> None:
         dic=S_eval(self,flag)
         logging.debug(dic)
-        if dic["CONDITION"]=="True":
+        #breakpoint()
+        condition=runcode(self,dic["CONDITION"])
+        if condition=="True":
             runcode(self,dic["SUBSTACK"])
+            logging.debug("True")
+        else:
+            logging.debug("False")    
     def control_if_else(self, flag: str) -> None:
         dic=S_eval(self,flag)
         logging.debug(dic)
@@ -1149,7 +1156,11 @@ while not done:
     except KeyboardInterrupt:
         logging.error("键盘中断")
         done=True
-        #raise KeyboardInterrupt    
+        #raise KeyboardInterrupt 
+    except Exception as e:  
+        logging.error(e)
+        done=True
+        #raise e  
 
         
 
