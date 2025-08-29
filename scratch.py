@@ -629,7 +629,7 @@ class Sprite(pygame.sprite.Sprite):
             # 在舞台范围内生成随机位置 (-240到240, -180到180)
             y = random.uniform(-180, 180)
             x = random.uniform(-240, 240)
-            return POSITION(x, y)
+            return Position(x, y)
         elif to == "_mouse_":
             # 获取鼠标当前位置并转换为Scratch坐标系
             mousepos = Position(*pygame.mouse.get_pos(),"show")
@@ -698,14 +698,15 @@ class Sprite(pygame.sprite.Sprite):
         
         功能:
         - 增加角色的方向角度（顺时针旋转）
-        - 角度会自动取模保持在0-360度范围内
+        - 之前角度会自动取模保持在0-360度范围内，现在从runcode里检查改为每个改角度的块检查
         
         说明:
         - 正角度值表示顺时针旋转
         - 使用safe_int确保角度值为整数
         """
         addition = S_eval(self, flag)["DEGREES"]
-        self.direction += safe_int(addition)
+        self.direction += safe_int(addition)            
+        sprite.direction %= 360  # 这里解决角度超出[0,360]范围的问题
 
     def motion_turnleft(self, flag: str) -> None:
         """
@@ -716,7 +717,7 @@ class Sprite(pygame.sprite.Sprite):
         
         功能:
         - 减少角色的方向角度（逆时针旋转）
-        - 角度会自动取模保持在0-360度范围内
+        - 之前角度会自动取模保持在0-360度范围内，现在从runcode里检查改为每个改角度的块检查
         
         说明:
         - 正角度值表示逆时针旋转
@@ -724,6 +725,7 @@ class Sprite(pygame.sprite.Sprite):
         """
         addition = S_eval(self, flag)["DEGREES"]
         self.direction -= safe_int(addition)
+        sprite.direction %= 360  # 这里解决角度超出[0,360]范围的问题
 
     def event_whenflagclicked(self, flag) -> None:
         """
@@ -962,6 +964,9 @@ class Sprite(pygame.sprite.Sprite):
             dx = x - self.x
             dy = y - self.y
             direction = 90 - math.degrees(math.atan2(dy, dx))
+            
+            direction = direction%360
+
             return direction
         if dic["TOWARDS"] == "_mouse_":
             mousepos = pygame.mouse.get_pos()
@@ -1565,7 +1570,7 @@ class Sprite(pygame.sprite.Sprite):
         """
         dic = S_eval(self, flag)
         logging.debug(dic)
-        return safe_str(dic["STRING1"] + dic["STRING2"])
+        return safe_str(dic["STRING1"]) + safe_str(dic["STRING2"])
     def operator_letter_of(self, flag):
         """
         获取字符串中指定位置的字符
@@ -2089,8 +2094,7 @@ def runcode(sprite: Sprite, flag: str)  :
     if flag is None:
         return
         
-    if not sprite.isStage:
-        sprite.direction %= 360  # 这里解决角度超出[0,360]范围的问题
+
 
     logging.info(f"进入{sprite.name}的{sprite.blocks[flag]['opcode']}函数")
     result = None
@@ -2105,6 +2109,11 @@ def runcode(sprite: Sprite, flag: str)  :
     clock.tick(TPS)
     if sprite.blocks[flag].get("next") and sprite.clone_mode != 2:
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
+    else:
+        #本积木块完成使命
+        logging.debug("本积木块完成使命")
+        #breakpoint()
+            
     return result
 
 # 主程序从这里开始
@@ -2131,8 +2140,7 @@ for i in t["targets"]:
     sprite = Sprite(i)
     sprite_list.append(sprite)
 
-    # 提取角色的变量和列表
-    # ... 保持不变 ...
+
     #提取角色的变量和列表
     sprite.variables={}
     sprite.lists={}
