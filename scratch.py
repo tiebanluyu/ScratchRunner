@@ -742,7 +742,12 @@ class Sprite(pygame.sprite.Sprite):
         - 这是Scratch项目的主要启动事件
         - 通常在项目开始时自动执行
         """
-        runcode(self, self.blocks[flag]["next"])
+        #runcode(self, self.blocks[flag]["next"])
+        # 这个积木本身不执行任何操作，只是一个事件入口
+        # 后续积木由runcode负责执行，之前这里误加了一条，导致执行两遍
+        logging.info("绿旗被点击")
+        
+        
 
     def control_if(self, flag: str) -> None:
         """
@@ -1051,7 +1056,7 @@ class Sprite(pygame.sprite.Sprite):
         - 不会自动清除，需要手动设置空字符串来隐藏
         """
         dic = S_eval(self, flag)
-        message = dic["MESSAGE"]
+        message = safe_str(dic["MESSAGE"])
         self.words = message
     
     looks_think = looks_say
@@ -1881,6 +1886,7 @@ class Sprite(pygame.sprite.Sprite):
         logging.debug(dic)
         return dic['KEY_OPTION']   
     def sensing_timer(self,flag=None):
+        #计时器的数值存储在stage.time中
         return safe_str(time.time()-stage.time)
     def sensing_resettimer(self,flag=None):
         stage.time=time.time()
@@ -2046,7 +2052,9 @@ class Moniter:
         for name, value in dict1.items():
             #logging.debug((name, value))
             setattr(self, name, value)
-        self.sprite=stage#全局变量默认从stage中找
+        self.sprite=stage#全局变量默认从stage中找，
+        #这是为什么stage不允许局部变量的原因
+        #project.json是这么处理的
 
         if self.spriteName is not  None:
             for i in sprite_list:               
@@ -2111,8 +2119,11 @@ def runcode(sprite: Sprite, flag: str)  :
         runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
     else:
         #本积木块完成使命
-        logging.debug("本积木块完成使命")
+        #logging.debug("本积木块完成使命")
         #breakpoint()
+        pass
+
+        
             
     return result
 
@@ -2194,82 +2205,72 @@ pygame.display.set_caption("scratch")
 logging.info("进入主循环")
 try:
     while not done:
-    # 处理事件
-        try:
-            event = pygame.event.poll()
-            #logging.debug(event)
-            if event.type != pygame.NOEVENT:
-                #print(event)
-                if event.type == pygame.KEYDOWN:
-                    print(event.key)
-            if event.type == pygame.QUIT:
-                done = True
-            keys_pressed = pygame.key.get_pressed() 
-            if any(keys_pressed):
-                pass
-                #logging.debug(keys_pressed)
-                import keymap
-                for i in sprite_list+clone_list:
-                    if i.clone_mode==2:#克隆体被删除
-                        continue
-                            
-                    for flag, code in i.blocks.items():
-                        if code["opcode"] == "event_whenkeypressed":
-                            if keys_pressed[keymap.keymap[code["fields"]["KEY_OPTION"][0]]]:
-                                #logging.debug(code)
-                                flag = code["next"]
-                                thread = threading.Thread(
-                                    name=str(i) + flag, target=runcode, args=(i, flag)
-                                )
-                                thread.start()
-                                # runcode(i,flag)
-
-                
-
-            
-                    
-
-        
-
-            # 填充窗口颜色
-            screen.fill((255, 255, 255))
-
-            # 逐个角色更新窗口
-            
+    # 处理事件        
+        event = pygame.event.poll()
+        #logging.debug(event)
+        if event.type != pygame.NOEVENT:
+            #print(event)
+            if event.type == pygame.KEYDOWN:
+                print(event.key)
+        if event.type == pygame.QUIT:
+            done = True
+        keys_pressed = pygame.key.get_pressed() 
+        if any(keys_pressed):
+            pass
+            #logging.debug(keys_pressed)
+            import keymap
             for i in sprite_list+clone_list:
                 if i.clone_mode==2:#克隆体被删除
                     continue
-                try:
-                    i.draw() 
-                except:
-                    done=True 
-                    raise Exception
-                    
-                    
-            for i in moniter_list:
-                try:
-                    i.draw() 
-                except:
-                    done=True 
-                    raise Exception      
+                        
+                for flag, code in i.blocks.items():
+                    if code["opcode"] == "event_whenkeypressed":
+                        if keys_pressed[keymap.keymap[code["fields"]["KEY_OPTION"][0]]]:
+                            #logging.debug(code)
+                            flag = code["next"]
+                            thread = threading.Thread(
+                                name=str(i) + flag, target=runcode, args=(i, flag)
+                            )
+                            thread.start()
+                            # runcode(i,flag)
 
-                # 更新窗口
-                
-            scaled_screen=pygame.transform.scale(screen,(960,720))
-            
-            show_screen.blit(scaled_screen,(0,0))
             
 
-            pygame.display.update()
+        
                 
-            clock.tick(FPS)
-        except KeyboardInterrupt:
-            logging.error("键盘中断")
-            done=True
-            #raise KeyboardInterrupt 
-        except Exception as e:  
-            logging.error(e)
-            done=True
+
+    
+
+        # 填充窗口颜色
+        screen.fill((255, 255, 255))
+
+        # 逐个角色更新窗口
+        
+        for i in sprite_list+clone_list:
+            if i.clone_mode==2:#克隆体被删除
+                continue
+            
+            i.draw() 
+
+                
+                
+        for i in moniter_list:
+
+            i.draw() 
+     
+
+            # 更新窗口
+            
+        scaled_screen=pygame.transform.scale(screen,(960,720))
+        
+        show_screen.blit(scaled_screen,(0,0))
+        
+
+        pygame.display.update()
+            
+        clock.tick(FPS)
+
+
         
 except KeyboardInterrupt:
     logging.error("键盘中断")
