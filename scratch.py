@@ -836,6 +836,8 @@ class Sprite(pygame.sprite.Sprite):
         - 使用safe_int确保次数为整数
         """
         dic = S_eval(self, flag)
+        if self.blocks[flag]["inputs"]["SUBSTACK"][1] is None:
+            return
         for _ in range(safe_int(dic["TIMES"])):
             if self.clone_mode==2:
                 break
@@ -2093,8 +2095,11 @@ class Moniter:
 
          
 
-def runcode(sprite: Sprite, flag: str)  :
-    
+def runcode(sprite: Sprite, flag: str,should_next: str = True)  :
+    """
+    next_flag参数用来控制是否执行下一个积木,设置为False时不执行
+    这样可以集成一个控制器，防止递归调用
+    """
     global done
     if done:
         return
@@ -2112,16 +2117,22 @@ def runcode(sprite: Sprite, flag: str)  :
     except AttributeError:
         logging.error(f"缺少函数{sprite.blocks[flag]['opcode']}")
     except Exception as e:
+        
         logging.error(f"执行积木{flag}时出错: {traceback.format_exc()}")
     
     clock.tick(TPS)
-    if sprite.blocks[flag].get("next") and sprite.clone_mode != 2:
-        runcode(sprite=sprite, flag=sprite.blocks[flag]["next"])
-    else:
-        #本积木块完成使命
-        #logging.debug("本积木块完成使命")
+    if should_next:
+        #只有积木块第一个积木才会执行这块python代码
+        #之后的积木都在这里顺序执行
+        logging.debug("进入顺序执行控制器")
         #breakpoint()
-        pass
+        next_flag=sprite.blocks[flag].get("next")
+        while next_flag!=None:
+            if sprite.clone_mode==2:
+                return
+        
+            runcode(sprite=sprite, flag=next_flag,should_next=False)
+            next_flag=sprite.blocks[next_flag].get("next")
 
         
             
