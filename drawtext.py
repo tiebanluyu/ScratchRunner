@@ -22,45 +22,45 @@ def drawtext(sprite,surface):
     pygame.draw.rect(surface, (255, 255, 255), (*rect.topright, *textsurface.get_size()),0,10)
     pygame.draw.rect(surface, (0, 0, 0), (rect.topright[0]-5,rect.topright[1]-5, textsurface.get_size()[0]+10,textsurface.get_size()[1]+10),2,10)
     surface.blit(textsurface,rect.topright)
-def drawvariable(moniter,text,surface):
+def drawvariable(monitor,text,surface):
     #font =pygame.font.Font("HarmonyOS_Sans_SC_Regular.ttf",24)
     #logging.debug(text)
-    if not moniter.visible:
+    if not monitor.visible:
         return
-    if moniter.sprite.isStage:
-        text1=moniter.name
+    if monitor.sprite.isStage:
+        text1=monitor.name
         text2=str(text)
     else:
-        text1=str(moniter.sprite)+moniter.name
+        text1=str(monitor.sprite)+monitor.name
         text2=str(text)
     #logging.debug((text1,text2))    
     fontColor = (0, 0, 0)
     textsurface=font.render(text1+text2+" ",True, fontColor)
-    position=(moniter.x,moniter.y)   
+    position=(monitor.x,monitor.y)   
     pygame.draw.rect(surface, (230,240,255), (*position, *textsurface.get_size()),0,3)
     textsurface=font.render(text1,True, fontColor)
     surface.blit(textsurface,position)
 
     fontColor=(255,255,255)
        
-    position=(moniter.x+textsurface.get_size()[0]+5,moniter.y)
+    position=(monitor.x+textsurface.get_size()[0]+5,monitor.y)
     #刻意将position计算放在text渲染前，这里textsurface是上一个的
     textsurface=font.render(text2,True, fontColor)
     pygame.draw.rect(surface, (255, 140, 26), (*position, *textsurface.get_size()),0,3)
     surface.blit(textsurface,position)
     
     #logging.debug("drawvariable")
-def drawlist(moniter,thelist,screen):
+def drawlist(monitor,thelist,screen):
     slice_lict=[]
     fontColor = (0, 0, 0)
     for i in thelist:
         if len(i)>10:
             i=i[:10]+"..."
         slice_lict.append(i)
-    y=moniter.show_y+30
+    y=monitor.show_y+30
     x=5
-    backgroundsurface=pygame.surface.Surface((moniter.width,moniter.height))
-    backgroundrect=pygame.draw.rect(screen, (255, 140, 26), (moniter.x,moniter.y, *backgroundsurface.get_size()),0)
+    backgroundsurface=pygame.surface.Surface((monitor.width,monitor.height))
+    backgroundrect=pygame.draw.rect(screen, (255, 140, 26), (monitor.x,monitor.y, *backgroundsurface.get_size()),0)
     backgroundsurface.fill((230,240,255))
     
     #backgroundsurface.blit(textsurface,rect)    
@@ -75,10 +75,10 @@ def drawlist(moniter,thelist,screen):
             backgroundsurface.blit(textsurface,rect)
             
         y+=textsurface.get_size()[1]+5
-        if y>moniter.height:
+        if y>monitor.height:
             break
     #绘制列表名称
-    textsurface=font.render(moniter.params["LIST"],True, fontColor)
+    textsurface=font.render(monitor.params["LIST"],True, fontColor)
     rect=pygame.draw.rect(backgroundsurface, (255,255,255), (0,0, *textsurface.get_size()))
 
     backgroundsurface.blit(textsurface,rect)
@@ -95,13 +95,13 @@ def drawlist(moniter,thelist,screen):
     if is_mouse_over and is_mouse_down:
         # 鼠标悬停在图像上
 
-        moniter.show_y=moniter.show_y+get_mouse_speed()[1]/10
+        monitor.show_y=monitor.show_y+get_mouse_speed()[1]/10
 
         #上移有界
-        if moniter.show_y>0:
-            moniter.show_y=0
+        if monitor.show_y>0:
+            monitor.show_y=0
         
-        logging.debug("show_y:"+str(moniter.show_y))
+        logging.debug("show_y:"+str(monitor.show_y))
     else:
         pass
         # 鼠标不在图像上

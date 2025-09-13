@@ -45,7 +45,7 @@ ScratchRunner是一个用Python编写的Scratch项目(.sb3文件)运行器，它
 - Position: 坐标系转换工具类
 - Sprite: 角色/舞台的基类，包含所有积木方法
 - runcode: 积木执行入口函数
-- Moniter: 变量和列表监视器显示
+- Monitor: 变量和列表监视器显示
 
 坐标系系统：
 - Scratch坐标系：原点在舞台中心(0,0)，x向右为正(-240到240)，y向上为正(-180到180)
@@ -1839,14 +1839,14 @@ class Sprite(pygame.sprite.Sprite):
         dic=S_eval(self,flag)
         logging.debug(dic)
         #thelist:list[str]=getlist(self,dic["LIST"])
-        for i in moniter_list:
+        for i in monitor_list:
             if i.id==dic["LIST"]:
                 i.visible=True
     def data_hidelist(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
         #thelist:list[str]=getlist(self,dic["LIST"])
-        for i in moniter_list:
+        for i in monitor_list:
             if i.id==dic["LIST"]:
                 i.visible=False
     def control_create_clone_of(self,flag):
@@ -2044,7 +2044,7 @@ class Sprite(pygame.sprite.Sprite):
         
 
 
-class Moniter:
+class Monitor:
     def __str__(self):
         return self.params["VARIABLE"]
     @property
@@ -2204,10 +2204,10 @@ for i in t["targets"]:
 
 logging.info("提取变量完成") 
 logging.debug(list_name_to_id)         
-moniter_list=[]            
+monitor_list=[]            
 for i in t["monitors"]:
-    moniter=Moniter(i)
-    moniter_list.append(moniter)
+    monitor=Monitor(i)
+    monitor_list.append(monitor)
 logging.info("创建显示框完成")
 # 设置窗口标题
 pygame.display.set_caption("scratch")
@@ -2265,7 +2265,7 @@ try:
 
                 
                 
-        for i in moniter_list:
+        for i in monitor_list:
 
             i.draw() 
      
