@@ -976,9 +976,10 @@ class Sprite(pygame.sprite.Sprite):
 
             return direction
         if dic["TOWARDS"] == "_mouse_":
-            mousepos = pygame.mouse.get_pos()
-            mousepos = positionmap2(mousepos[0], mousepos[1])
-            return pos2angle(*mousepos)
+            mousepos = Position(*pygame.mouse.get_pos(),"show")
+
+            #mousepos = positionmap2(mousepos[0], mousepos[1])
+            return pos2angle(*mousepos.p)
         elif dic["TOWARDS"] == "_random_":
             import random
 
@@ -2050,7 +2051,19 @@ class Monitor:
     @property
     def name(self):
         return self.params["VARIABLE"]
+    @property
+    def x(self):
+        #logging.debug(self.position.pygame())
+        return self.position.pygame()[0]
+    @property
+    def y(self):
+        return self.position.pygame()[1]
     def __init__(self,dict1):
+        #logging.debug(dict1)
+        dict1["position"]=Position(dict1["x"],dict1["y"],"pygame")
+        del dict1["x"]
+        del dict1["y"]
+
         for name, value in dict1.items():
             #logging.debug((name, value))
             setattr(self, name, value)
