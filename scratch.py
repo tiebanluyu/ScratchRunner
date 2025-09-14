@@ -104,6 +104,7 @@ from typing import List, Tuple, Literal
 from drawtext import drawtext, drawvariable, drawlist
 from rotate import blitRotate
 from variable import safe_int, safe_str, safe_bool, safe_float, IsNum
+from collision import check_collision
 
 # 配置日志
 logging.basicConfig(
@@ -579,7 +580,7 @@ class Sprite(pygame.sprite.Sprite):
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
         #pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
-        self.mask = pygame.mask.from_surface(self.image)
+        
         drawtext(self, screen)
 
     def motion_goto(self, flag) -> None:
@@ -1896,13 +1897,14 @@ class Sprite(pygame.sprite.Sprite):
     def collision(self,others:"Sprite"|Literal["_mouse_"]):
         logging.debug(others)   
         if others=="_mouse_":
-            mouse_x,mouse_y=pygame.mouse.get_pos()
-            mouse_x/=2
-            mouse_y/=2
-            rect=pygame.Rect(mouse_x-5,mouse_y-5,10,10)
-            others=Sprite({"x":mouse_x,"y":mouse_y,"name":"mouse","rect":rect})
-            others.mask=pygame.mask.Mask((10,10),True)
-            logging.debug(others.rect)
+            mouse_pos=pygame.mouse.get_pos()
+            mouse_pos=Position(mouse_pos[0],mouse_pos[1],"show").pygame()
+
+            mouse_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], 1, 1)
+            mouse_image = pygame.Surface((1, 1), pygame.SRCALPHA)
+            mouse_image.fill((255, 255, 255, 255))  # 创建一个完全不透明的白色像素
+            #logging.debug(others.rect)
+            return check_collision(self.rect,self.image,mouse_rect,mouse_image)
         if others=="_edge_":
             if not (0 <=self.rect.left <= self.rect.right <= 480):
                 return True
@@ -1910,14 +1912,9 @@ class Sprite(pygame.sprite.Sprite):
                 return True
             return False
                  
+        return check_collision(self.rect,self.image,others.rect,others.image)         
             
-        #粗略检测矩形，后续可以加入精细检测    
-        if self.rect.colliderect(others.rect):
-            print("角色碰撞了！")
-            return True
-        else:
-            print("角色没有碰撞")
-            return False
+                
     def sensing_touchingobject(self,flag):
         dic=S_eval(self,flag)
         logging.debug(dic)
@@ -2016,7 +2013,7 @@ class Sprite(pygame.sprite.Sprite):
         for key,value in argcs.items():
             #在读取参数时，scratch完全按照名字检索，所以要把id转成名字
             mutation=self.blocks[flags["flag_procedure_prototype"]]["mutation"]
-            #去你妈的，mutation["argumentids"]是一个字符串，长得像一个列表，像这样 "["a","b","c"]"
+            #去你妈的，mutation["argumentids"]是一个字符串，长得像一个列表，像这样 '["a","b","c"]'
             #在字符状态下，先全部统一大写，然后再用eval转成列表，再用zip和dict转成字典
             #最后实现这样的效果
             #dict1={'FWV;F_+X!EOJ}8AFV[*)': 'content', 'VS}LUVVOE?WQMI#.^D}P': 'secs'}
@@ -2126,9 +2123,11 @@ def runcode(sprite: Sprite, flag: str,should_next: str = True)  :
     result = None
     try:
         func = getattr(sprite, sprite.blocks[flag]["opcode"])
-        result = func(flag)    
+            
     except AttributeError:
         logging.error(f"缺少函数{sprite.blocks[flag]['opcode']}")
+    try: 
+        result = func(flag)    
     except Exception as e:
         
         logging.error(f"执行积木{flag}时出错: {traceback.format_exc()}")
