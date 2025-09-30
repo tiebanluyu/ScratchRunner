@@ -1,8 +1,9 @@
 import pygame,logging
 from mouse import get_mouse_speed
+from position import Position
 pygame.font.init()
 try:
-    font = pygame.font.SysFont("simhei",20)
+    font = pygame.font.SysFont("simhei",30)
 except:#不排除其他国家没有宋体        
     font = pygame.font.SysFont(None,16)
 def drawtext(sprite,surface):
@@ -36,14 +37,15 @@ def drawvariable(monitor,text,surface):
     #logging.debug((text1,text2))    
     fontColor = (0, 0, 0)
     textsurface=font.render(text1+text2+" ",True, fontColor)
-    position=(monitor.x,monitor.y)   
+    scale_times=abs((Position.PYGAME[1]-Position.PYGAME[0])/(Position.SCRATCH[1]-Position.SCRATCH[0]))
+    position=(monitor.x*scale_times,monitor.y*scale_times)   
     pygame.draw.rect(surface, (230,240,255), (*position, *textsurface.get_size()),0,3)
     textsurface=font.render(text1,True, fontColor)
     surface.blit(textsurface,position)
 
     fontColor=(255,255,255)
        
-    position=(monitor.x+textsurface.get_size()[0]+5,monitor.y)
+    position=(monitor.x*scale_times+textsurface.get_size()[0]+5,monitor.y*scale_times)
     #刻意将position计算放在text渲染前，这里textsurface是上一个的
     textsurface=font.render(text2,True, fontColor)
     pygame.draw.rect(surface, (255, 140, 26), (*position, *textsurface.get_size()),0,3)
