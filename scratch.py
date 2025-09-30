@@ -198,21 +198,49 @@ class Position:
     
     坐标系说明：
     - Scratch坐标系：原点在舞台中心(0,0)，x向右为正(-240到240)，y向上为正(-180到180)
-    - Pygame坐标系：原点在左上角(0,0)，x向右为正(0到480)，y向下为正(0到360)
+    - Pygame坐标系：原点在左上角(0,0)，x向右为正(0到960)，y向下为正(0到960)
     - Show坐标系：用于2倍缩放显示(960x720)，提供更好的视觉效果
     
-    支持三种模式：
-    1. 'scratch': 直接使用Scratch坐标
-    2. 'pygame': 将Pygame坐标转换为Scratch坐标
-    3. 'show': 将显示坐标转换为Scratch坐标
     
-    转换公式：
-    - Scratch → Pygame: (x + 240, 180 - y)
-    - Pygame → Scratch: (x - 240, 180 - y)
-    - Scratch → Show: (x*2 + 240, 360 - y*2)
-    - Show → Scratch: (x/2 - 240, 180 - y/2)
     """
+    SCRATCH=(-240,240,-180,180) # 最左边x,最右边x,最下边y,最上边y
+    PYGAME=(0,960,720,0)
+    SHOW=(0,960,720,0)
+    @staticmethod
+    def position_map(from_tuple:Tuple[int,int,int,int],destination_tuple:Tuple[int,int,int,int],x:int,y:int)->Tuple[int,int]:
+        """
+        通用坐标转换函数
+        
+        参数:
+        from_tuple: 源坐标系范围 (x_min, x_max, y_min, y_max)
+        destination_tuple: 目标坐标系范围 (x_min, x_max, y_min, y_max)
+        x, y: 源坐标系中的坐标值
+        
+        返回:
+        (new_x, new_y): 目标坐标系中的坐标值
+        
+        说明:
+        - 通过线性映射实现任意两个坐标系之间的转换
+        - 保持相对位置和比例不变
+        """
+        from_x_min, from_x_max, from_y_min, from_y_max = from_tuple
+        dest_x_min, dest_x_max, dest_y_min, dest_y_max = destination_tuple
+        
+        # 计算比例因子
+        scale_x = (dest_x_max - dest_x_min) / (from_x_max - from_x_min)
+        scale_y = (dest_y_max - dest_y_min) / (from_y_max - from_y_min)
+        
+        # 进行线性映射
+        new_x = dest_x_min + (x - from_x_min) * scale_x
+        new_y = dest_y_min + (y - from_y_min) * scale_y
+        
+        return int(new_x), int(new_y)
+        
+
+
+
     def __init__(self, x: int, y: int, mode: str = "scratch") -> None:
+
         """
         初始化位置对象
         
@@ -228,10 +256,9 @@ class Position:
             self.x = x
             self.y = y
         elif mode == "pygame":
-            self.x, self.y = positionmap2(x, y)
+            self.x, self.y = self.position_map(self.PYGAME,self.SCRATCH,x, y)
         elif mode == "show":
-            self.x = x/2 - 240
-            self.y = 180 - y/2
+            self.x, self.y = self.position_map(self.SHOW,self.SCRATCH,x, y)
     
     def __str__(self) -> str:
         """返回位置的可读字符串表示"""
@@ -257,7 +284,7 @@ class Position:
         返回:
         (x, y): Pygame坐标系中的坐标值
         """
-        return positionmap1(self.x, self.y)
+        return self.position_map(self.SCRATCH,self.PYGAME,self.x, self.y)
     
     def show(self) -> Tuple[int, int]:
         """
@@ -266,7 +293,7 @@ class Position:
         返回:
         (x, y): 显示坐标系中的坐标值
         """
-        return self.x*2 + 240, 360 - self.y*2          
+        return self.position_map(self.SCRATCH,self.SHOW,self.x, self.y)          
 from time import sleep
 from rotate import blitRotate
 from variable import *
@@ -276,14 +303,14 @@ FPS: int = 50  # 图形渲染帧率（Frames Per Second）
 TPS: int = 50  # 逻辑更新帧率（Ticks Per Second）
 
 # 窗口大小设置
-STAGE_SIZE = (480, 360)  # 舞台实际渲染尺寸（Pygame坐标系）
-STAGE_SHOW_SIZE = (960, 720)  # 舞台显示尺寸（2倍缩放，用于更好的视觉效果）
+STAGE_SIZE = (960, 720)  # 舞台实际渲染尺寸（Pygame坐标系）
+STAGE_SHOW_SIZE = (960, 720)  # 舞台显示尺寸
 POSITION = (0, 0)  # 默认位置常量
 
 
-# 自定义坐标转换函数
+"""# 自定义坐标转换函数
 def positionmap1(x: int, y: int) -> tuple[int, int]:
-    """
+    
     将Scratch坐标系坐标转换为Pygame坐标系坐标
     
     参数:
@@ -299,7 +326,7 @@ def positionmap1(x: int, y: int) -> tuple[int, int]:
     说明:
     - Scratch坐标系: 原点在中心(0,0)，x向右为正，y向上为正
     - Pygame坐标系: 原点在左上角(0,0)，x向右为正，y向下为正
-    """
+    
     ORIGIN_X = STAGE_SIZE[0] // 2  # 舞台中心x坐标 (240)
     ORIGIN_Y = STAGE_SIZE[1] // 2  # 舞台中心y坐标 (180)
     new_x = x + ORIGIN_X
@@ -308,7 +335,7 @@ def positionmap1(x: int, y: int) -> tuple[int, int]:
 
 
 def positionmap2(x: int, y: int) -> tuple[int, int]:
-    """
+    
     将Pygame坐标系坐标转换为Scratch坐标系坐标
     
     参数:
@@ -324,12 +351,12 @@ def positionmap2(x: int, y: int) -> tuple[int, int]:
     说明:
     - 这是positionmap1的逆变换
     - 用于将鼠标位置等Pygame坐标转换为Scratch坐标
-    """
+    
     ORIGIN_X = STAGE_SIZE[0] // 2  # 舞台中心x坐标 (240)
     ORIGIN_Y = STAGE_SIZE[1] // 2  # 舞台中心y坐标 (180)
     new_x = x - ORIGIN_X
     new_y = ORIGIN_Y - y
-    return new_x, new_y
+    return new_x, new_y"""
 
 
 def S_eval(sprite: "Sprite", flag: str) -> dict:
@@ -558,24 +585,28 @@ class Sprite(pygame.sprite.Sprite):
             image = pygame.image.load(costume["md5ext"])
         except:
             image = pygame.image.load(costume["assetId"]+"."+costume["dataFormat"])    
-        if "svg" != costume["dataFormat"]:
+        
+        if "svg" == costume["dataFormat"]:
             image = pygame.transform.rotozoom(
-                image, 0, 0.5
+                image, 0, 2
             )  # 位图精度高（否则一个一个点不美观），实际储存时图像会大一些
         if self.isStage:
             screen.blit(image, (0, 0))
             return # stage没有direction属性
         if not self.visible:
             return
-        
-        image = pygame.transform.rotozoom(
-                image, 0, self.size/100
-            )
+        if self.size != 100:
+            image = pygame.transform.rotozoom(
+                    image, 0, self.size/100
+                )
         direction = self.direction % 360  # stage没有direction属性
         #x, y = positionmap1(self.x, self.y)
         position = Position(self.x, self.y)
         x, y = position.pygame()
         rotatecentre = costume["rotationCenterX"]*(self.size/100), costume["rotationCenterY"]*(self.size/100)
+        scale_times=(Position.PYGAME[1]-Position.PYGAME[0]) / (Position.SCRATCH[1]-Position.SCRATCH[0])
+        print(rotatecentre,scale_times)
+        rotatecentre= rotatecentre[0]*scale_times, rotatecentre[1]*scale_times # 2倍缩放
         self.image, self.rect = blitRotate(
             screen, image, (x, y), rotatecentre, 90 - direction
         )  # 他山之石可以攻玉
@@ -980,7 +1011,7 @@ class Sprite(pygame.sprite.Sprite):
             mousepos = Position(*pygame.mouse.get_pos(),"show")
 
             #mousepos = positionmap2(mousepos[0], mousepos[1])
-            return pos2angle(*mousepos.p)
+            return pos2angle(*mousepos.scratch())
         elif dic["TOWARDS"] == "_random_":
             import random
 
@@ -993,7 +1024,7 @@ class Sprite(pygame.sprite.Sprite):
     def motion_ifonedgebounce(self, flag:str=None):
         # 其实遇到边缘就反弹没有任何参数   
         #logging.debug((self.x>0,((self.direction%360)>180)))    
-        if not (0 <=self.rect.left <= self.rect.right <= 480):
+        if not (Position.PYGAME[0] <=self.rect.left <= self.rect.right <= Position.PYGAME[1]):
             
             if (self.x>0)+((self.direction%360)>180)==1:#在已经转向的情况下不会转回去
                 self.direction = -self.direction
@@ -1005,7 +1036,7 @@ class Sprite(pygame.sprite.Sprite):
                 self.x = 480 - self.x"""
 
         #logging.debug((self.y>0,( (90<(self.direction%360)<270)))) 
-        if not (0 <= self.rect.top <= self.rect.bottom <= 360):
+        if not (Position.PYGAME[3] <= self.rect.top <= self.rect.bottom <= Position.PYGAME[2]):
             if bool(self.y>0)+(90<(self.direction%360)<270)==1:#没好
                 #self.direction = -self.direction
                 logging.debug("碰撞")
@@ -1906,9 +1937,9 @@ class Sprite(pygame.sprite.Sprite):
             #logging.debug(others.rect)
             return check_collision(self.rect,self.image,mouse_rect,mouse_image)
         if others=="_edge_":
-            if not (0 <=self.rect.left <= self.rect.right <= 480):
+            if not (Position.PYGAME[0] <=self.rect.left <= self.rect.right <= Position.PYGAME[1]):
                 return True
-            if not (0 <=self.rect.top <= self.rect.bottom <= 360):
+            if not (Position.PYGAME[2] <=self.rect.top <= self.rect.bottom <= Position.PYGAME[3]):
                 return True
             return False
                  
@@ -1971,6 +2002,7 @@ class Sprite(pygame.sprite.Sprite):
         """
         dic=S_eval(self,flag)
         logging.debug(dic)
+
         return safe_str(180-pygame.mouse.get_pos()[1]/2)
     def sensing_dayssince2000(self,flag):
         dic=S_eval(self,flag)
