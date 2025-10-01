@@ -726,6 +726,7 @@ class Sprite(pygame.sprite.Sprite):
             if self.clone_mode==2:
                 break
             runcode(self, self.blocks[flag]["inputs"]["SUBSTACK"][1])
+            
 
     def control_forever(self, flag: str) -> None:
         """
@@ -748,6 +749,7 @@ class Sprite(pygame.sprite.Sprite):
             if self.clone_mode==2:
                 break
             runcode(self, self.blocks[flag]["inputs"]["SUBSTACK"][1])
+            clock.tick(TPS)
 
     def control_wait(self, flag: str) -> None:
         """
@@ -2017,7 +2019,7 @@ def runcode(sprite: Sprite, flag: str,should_next: str = True)  :
         
         logging.error(f"执行积木{flag}时出错: {traceback.format_exc()}")
     
-    clock.tick(TPS)
+    
     if should_next:
         #只有积木块第一个积木才会执行这块python代码
         #之后的积木都在这里顺序执行
